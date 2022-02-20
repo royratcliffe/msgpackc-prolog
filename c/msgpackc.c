@@ -13,12 +13,13 @@ static functor_t double_1_functor;
 /*
  * Writes octets to a Prolog output stream.
  *
- * Answers `TRUE` if the number of octets written matches the number
- * available; `FALSE` otherwise.
+ * Answers 0 if the number of octets written matches the number
+ * available; 1 otherwise. The return value is an error code, zero for
+ * no error.
  */
 static int
 stream_write(void *data, const char *buf, size_t len)
-{ return Sfwrite(buf, sizeof(*buf), len, data) == len;
+{ return Sfwrite(buf, sizeof(*buf), len, data) == len ? 0 : 1;
 }
 
 /*
@@ -44,17 +45,17 @@ pack_object_2(term_t Stream, term_t Object)
   switch (PL_term_type(Object))
   { case PL_ATOM:
       if (PL_unify_bool(Object, FALSE))
-        rc = msgpack_pack_false(&packer);
+        rc = msgpack_pack_false(&packer) == 0;
       else
       if (PL_unify_bool(Object, TRUE))
-        rc = msgpack_pack_true(&packer);
+        rc = msgpack_pack_true(&packer) == 0;
       else
         rc = PL_type_error("msgpack_pack_object", Object);
       break;
     case PL_INTEGER:
     { int i;
       if ((rc = PL_get_integer_ex(Object, &i)))
-      { rc = msgpack_pack_int(&packer, i);
+      { rc = msgpack_pack_int(&packer, i) == 0;
       }
       break;
     }
@@ -62,22 +63,23 @@ pack_object_2(term_t Stream, term_t Object)
     case PL_DOUBLE:
     { double f;
       if ((rc = PL_get_float_ex(Object, &f)))
-        rc = msgpack_pack_double(&packer, f);
+        rc = msgpack_pack_double(&packer, f) == 0;
       break;
     }
     case PL_NIL:
-      rc = msgpack_pack_nil(&packer);
+      rc = msgpack_pack_nil(&packer) == 0;
       break;
     case PL_BOOL:
     { int value;
       if ((rc = PL_get_bool(Object, &value)))
-        rc = (value ? msgpack_pack_true : msgpack_pack_false)(&packer);
+        rc = (value ? msgpack_pack_true : msgpack_pack_false)(&packer) == 0;
       break;
     }
     case PL_STRING:
     { char *s;
+      size_t len;
       if ((rc = PL_get_chars(Object, &s, CVT_STRING|CVT_EXCEPTION|REP_UTF8)))
-        rc = msgpack_pack_str_with_body(&packer, s, strlen(s));
+        rc = msgpack_pack_str_with_body(&packer, s, strlen(s)) == 0;
       break;
     }
     case PL_TERM:
@@ -88,7 +90,7 @@ pack_object_2(term_t Stream, term_t Object)
           if ((rc = PL_get_arg(1, Object, Arg1)))
           { double arg1;
             if ((rc = PL_get_float_ex(Arg1, &arg1)))
-            { rc = msgpack_pack_float(&packer, arg1);
+            { rc = msgpack_pack_float(&packer, arg1) == 0;
               break;
             }
           }
@@ -98,7 +100,7 @@ pack_object_2(term_t Stream, term_t Object)
           if ((rc = PL_get_arg(1, Object, Arg1)))
           { double arg1;
             if ((rc = PL_get_float_ex(Arg1, &arg1)))
-            { rc = msgpack_pack_double(&packer, arg1);
+            { rc = msgpack_pack_double(&packer, arg1) == 0;
               break;
             }
           }
