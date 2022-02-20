@@ -44,11 +44,11 @@ pack_object_2(term_t Stream, term_t Object)
   switch (PL_term_type(Object))
   { case PL_ATOM:
       if (PL_unify_bool(Object, FALSE))
-      { rc = msgpack_pack_false(&packer);
-      } else
+        rc = msgpack_pack_false(&packer);
+      else
       if (PL_unify_bool(Object, TRUE))
-      { rc = msgpack_pack_true(&packer);
-      } else
+        rc = msgpack_pack_true(&packer);
+      else
         rc = PL_type_error("msgpack_pack_object", Object);
       break;
     case PL_INTEGER:
