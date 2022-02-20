@@ -1,4 +1,4 @@
-﻿/*  File:    msgpackc.pl
+/*  File:    msgpackc.pl
     Author:  Roy Ratcliffe
     Created: Feb 19 2022
     Purpose: C-Based Message Pack for SWI-Prolog
