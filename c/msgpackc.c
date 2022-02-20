@@ -20,7 +20,7 @@ stream_write(void *data, const char *buf, size_t len)
 
 /*
  * Argument order of stream-object rather than the other way around
- * mimics the write/2 predicate family where the stream comes first in
+ * mimics the `write/2` predicate family where the stream comes first in
  * the argument list.
  *
  * What the C implementation calls a message packer is simply
@@ -29,20 +29,40 @@ stream_write(void *data, const char *buf, size_t len)
  */
 static foreign_t
 pack_object_2(term_t Stream, term_t Object)
-{ IOSTREAM *s;
-  msgpack_packer pk;
+{ int rc;
+  IOSTREAM *s;
+  msgpack_packer packer;
   if (!PL_get_stream(Stream, &s, SIO_OUTPUT)) PL_fail;
   if (s->encoding != ENC_OCTET)
   { return PL_release_stream(s)
         && PL_permission_error("msgpack_pack_object", "stream", Stream);
   }
-  msgpack_packer_init(&pk, s, stream_write);
+  msgpack_packer_init(&packer, s, stream_write);
   switch (PL_term_type(Object))
   { case PL_NIL:
-      msgpack_pack_nil(&pk);
+      rc = msgpack_pack_nil(&packer);
       break;
+    case PL_BOOL:
+    { int value;
+      rc = PL_get_bool(Object, &value);
+      if (!rc) break;
+      rc = (value ? msgpack_pack_true : msgpack_pack_false)(&packer);
+      break;
+    }
+    default:
+      rc = PL_type_error("msgpack_pack_object", Object);
   }
-  return PL_release_stream(s);
+  return PL_release_stream(s) && rc;
+}
+
+/*
+ * term_type(Term, ?Type:nonneg) is semidet.
+ *
+ * Useful for debugging the object pack switch above.
+ */
+static foreign_t
+term_type_2(term_t Term, term_t Type)
+{ return PL_unify_integer(Type, PL_term_type(Term));
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -94,6 +114,7 @@ version_3(term_t Major, term_t Minor, term_t Revision)
 install_t
 install_msgpackc()
 { PL_register_foreign("msgpack_pack_object", 2, pack_object_2, 0);
+  PL_register_foreign("term_type", 2, term_type_2, 0);
   PL_register_foreign("msgpack_version_string", 1, version_string_1, 0);
   PL_register_foreign("msgpack_version", 1, version_1, 0);
   PL_register_foreign("msgpack_version", 3, version_3, 0);
