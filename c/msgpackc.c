@@ -7,9 +7,15 @@
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+/*
+ * Writes octets to a Prolog output stream.
+ *
+ * Answers `TRUE` if the number of octets written matches the number
+ * available; `FALSE` otherwise.
+ */
 static int
 stream_write(void *data, const char *buf, size_t len)
-{ return Sfwrite(buf, 1, len, data) != len;
+{ return Sfwrite(buf, sizeof(*buf), len, data) == len;
 }
 
 /*
