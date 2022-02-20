@@ -70,9 +70,8 @@ pack_object_2(term_t Stream, term_t Object)
       break;
     case PL_BOOL:
     { int value;
-      rc = PL_get_bool(Object, &value);
-      if (!rc) break;
-      rc = (value ? msgpack_pack_true : msgpack_pack_false)(&packer);
+      if ((rc = PL_get_bool(Object, &value)))
+        rc = (value ? msgpack_pack_true : msgpack_pack_false)(&packer);
       break;
     }
     case PL_STRING:
