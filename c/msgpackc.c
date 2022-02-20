@@ -75,7 +75,7 @@ pack_object_2(term_t Stream, term_t Object)
       break;
     }
     case PL_STRING:
-    { const char *s;
+    { char *s;
       if ((rc = PL_get_chars(Object, &s, CVT_STRING|CVT_EXCEPTION|REP_UTF8)))
         rc = msgpack_pack_str_with_body(&packer, s, strlen(s));
       break;
