@@ -39,7 +39,16 @@ pack_object_2(term_t Stream, term_t Object)
   }
   msgpack_packer_init(&packer, s, stream_write);
   switch (PL_term_type(Object))
-  { case PL_NIL:
+  { case PL_ATOM:
+      if (PL_unify_bool(Object, FALSE))
+      { rc = msgpack_pack_false(&packer);
+      } else
+      if (PL_unify_bool(Object, TRUE))
+      { rc = msgpack_pack_true(&packer);
+      } else
+      rc = PL_type_error("msgpack_pack_object", Object);
+      break;
+    case PL_NIL:
       rc = msgpack_pack_nil(&packer);
       break;
     case PL_BOOL:
@@ -50,12 +59,6 @@ pack_object_2(term_t Stream, term_t Object)
       break;
     }
     default:
-      if (PL_unify_bool(Object, FALSE))
-      { rc = msgpack_pack_false(&packer);
-      } else
-      if (PL_unify_bool(Object, TRUE))
-      { rc = msgpack_pack_true(&packer);
-      } else
       rc = PL_type_error("msgpack_pack_object", Object);
   }
   return PL_release_stream(s) && rc;
@@ -65,6 +68,12 @@ pack_object_2(term_t Stream, term_t Object)
  * term_type(Term, ?Type:nonneg) is semidet.
  *
  * Useful for debugging the object pack switch above.
+ *
+ *      ?- msgpackc:term_type(false, A).
+ *      A = 2.
+ *
+ * Type 2 is `PL_ATOM`. Booleans are just atoms that Prolog can
+ * successfully interpret as true or false within certain contexts.
  */
 static foreign_t
 term_type_2(term_t Term, term_t Type)

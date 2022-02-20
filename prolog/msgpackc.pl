@@ -40,6 +40,8 @@ msgpack_pack_to_codes(Term, Codes) :-
 :- begin_tests(msgpack_pack_to_codes).
 
 test(nil, [Codes == [0xc0]]) :- msgpack_pack_to_codes([], Codes).
+test(false, [Codes == [0xc2]]) :- msgpack_pack_to_codes(false, Codes).
+test(true, [Codes == [0xc3]]) :- msgpack_pack_to_codes(true, Codes).
 
 :- end_tests(msgpack_pack_to_codes).
 
