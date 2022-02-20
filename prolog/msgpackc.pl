@@ -52,7 +52,13 @@ test(fixint) :-
            )).
 
 test(float32, [A == [0xca, 0, 0, 0, 0]]) :-
+    msgpackc:msgpack_pack_to_codes(float(0.0), A).
+test(float32, [A == [0xca, 63, 128, 0, 0]]) :-
+    msgpack_pack_to_codes(float(1.0), A).
+test(float64, [A == [0xcb, 0, 0, 0, 0, 0, 0, 0, 0]]) :-
     msgpackc:msgpack_pack_to_codes(0.0, A).
+test(float64, [A == [0xcb, 63, 240, 0, 0, 0, 0, 0, 0]]) :-
+    msgpack_pack_to_codes(double(1.0), A).
 
 :- end_tests(msgpack_pack_to_codes).
 

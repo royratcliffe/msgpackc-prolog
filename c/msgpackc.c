@@ -3,6 +3,9 @@
 
 #include "msgpack.h"
 
+static functor_t float_1_functor;
+static functor_t double_1_functor;
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -70,6 +73,31 @@ pack_object_2(term_t Stream, term_t Object)
       if (!rc) break;
       rc = (value ? msgpack_pack_true : msgpack_pack_false)(&packer);
       break;
+    }
+    case PL_TERM:
+    { functor_t Functor;
+      if ((rc = PL_get_functor(Object, &Functor)))
+      { if (Functor == float_1_functor)
+        { term_t Arg1 = PL_new_term_ref();
+          if ((rc = PL_get_arg(1, Object, Arg1)))
+          { double arg1;
+            if ((rc = PL_get_float_ex(Arg1, &arg1)))
+            { rc = msgpack_pack_float(&packer, arg1);
+              break;
+            }
+          }
+        } else
+        if (Functor == double_1_functor)
+        { term_t Arg1 = PL_new_term_ref();
+          if ((rc = PL_get_arg(1, Object, Arg1)))
+          { double arg1;
+            if ((rc = PL_get_float_ex(Arg1, &arg1)))
+            { rc = msgpack_pack_double(&packer, arg1);
+              break;
+            }
+          }
+        }
+      }
     }
     default:
       rc = PL_type_error("msgpack_pack_object", Object);
@@ -141,7 +169,9 @@ version_3(term_t Major, term_t Minor, term_t Revision)
 
 install_t
 install_msgpackc()
-{ PL_register_foreign("msgpack_pack_object", 2, pack_object_2, 0);
+{ float_1_functor = PL_new_functor_sz(PL_new_atom("float"), 1);
+  double_1_functor = PL_new_functor_sz(PL_new_atom("double"), 1);
+  PL_register_foreign("msgpack_pack_object", 2, pack_object_2, 0);
   PL_register_foreign("term_type", 2, term_type_2, 0);
   PL_register_foreign("msgpack_version_string", 1, version_string_1, 0);
   PL_register_foreign("msgpack_version", 1, version_1, 0);
