@@ -5,7 +5,12 @@
 */
 
 :- module(msgpackc,
-          [ msgpack_pack_object/2,      % +Stream,+Term
+          [ msgpack_pack_to_codes/2,    % +Term,-Codes
+
+            % +MemoryFile,+Term
+            msgpack_pack_to_memory_file/2,
+
+            msgpack_pack_object/2,      % +Stream,+Term
             msgpack_version_string/1,   % ?Version
             msgpack_version/1,          % ?Version
             msgpack_version/3           % ?Major,?Minor,?Revision
@@ -15,6 +20,40 @@
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+%!  msgpack_pack_to_codes(+Term, -Codes) is det.
+%
+%   Packs Term to Codes via a temporary memory file.
+%
+%   Packs Term as an object but drops the `_object` from the predicate
+%   functor for brevity.
+
+msgpack_pack_to_codes(Term, Codes) :-
+    setup_call_cleanup(
+        new_memory_file(MemoryFile),
+        (   msgpack_pack_to_memory_file(MemoryFile, Term),
+            memory_file_to_codes(MemoryFile, Codes)
+        ),
+        free_memory_file(MemoryFile)
+    ).
+
+:- begin_tests(msgpack_pack_to_codes).
+
+test(nil, [Codes == [0xc0]]) :- msgpack_pack_to_codes([], Codes).
+
+:- end_tests(msgpack_pack_to_codes).
+
+%!  msgpack_pack_to_memory_file(+MemoryFile, +Term) is det.
+%
+%   Packs to MemoryFile. Temporarily opens the memory file for octet
+%   writing.
+
+msgpack_pack_to_memory_file(MemoryFile, Term) :-
+    setup_call_cleanup(
+        open_memory_file(MemoryFile, write, Stream, [encoding(octet)]),
+        msgpack_pack_object(Stream, Term),
+        close(Stream)
+    ).
 
 %!  msgpack_pack_object(+Stream, +Term) is det.
 %
