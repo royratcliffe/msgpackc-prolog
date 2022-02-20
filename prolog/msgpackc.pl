@@ -43,6 +43,14 @@ test(nil, [Codes == [0xc0]]) :- msgpack_pack_to_codes([], Codes).
 test(false, [Codes == [0xc2]]) :- msgpack_pack_to_codes(false, Codes).
 test(true, [Codes == [0xc3]]) :- msgpack_pack_to_codes(true, Codes).
 
+test(fixint) :-
+    forall(between(0, 0x7f, A), msgpack_pack_to_codes(A, [A])).
+test(fixint) :-
+    forall(between(-32, -1, A),
+           (   B is 256 + A,
+               msgpack_pack_to_codes(A, [B])
+           )).
+
 :- end_tests(msgpack_pack_to_codes).
 
 %!  msgpack_pack_to_memory_file(+MemoryFile, +Term) is det.

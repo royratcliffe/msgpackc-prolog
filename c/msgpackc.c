@@ -48,6 +48,13 @@ pack_object_2(term_t Stream, term_t Object)
       } else
         rc = PL_type_error("msgpack_pack_object", Object);
       break;
+    case PL_INTEGER:
+    { int i;
+      if ((rc = PL_get_integer_ex(Object, &i)))
+      { rc = msgpack_pack_int(&packer, i);
+      }
+      break;
+    }
     case PL_NIL:
       rc = msgpack_pack_nil(&packer);
       break;
