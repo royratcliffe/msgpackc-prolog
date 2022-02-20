@@ -60,6 +60,9 @@ test(float64, [A == [0xcb, 0, 0, 0, 0, 0, 0, 0, 0]]) :-
 test(float64, [A == [0xcb, 63, 240, 0, 0, 0, 0, 0, 0]]) :-
     msgpack_pack_to_codes(double(1.0), A).
 
+test(fixstr, [A == [0b101 00000]]) :-
+    msgpack_pack_to_codes("", A).
+
 :- end_tests(msgpack_pack_to_codes).
 
 %!  msgpack_pack_to_memory_file(+MemoryFile, +Term) is det.
