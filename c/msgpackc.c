@@ -55,6 +55,12 @@ pack_object_2(term_t Stream, term_t Object)
       }
       break;
     }
+    case PL_FLOAT:
+    { double f;
+      if ((rc = PL_get_float_ex(Object, &f)))
+        rc = msgpack_pack_float(&packer, f);
+      break;
+    }
     case PL_NIL:
       rc = msgpack_pack_nil(&packer);
       break;

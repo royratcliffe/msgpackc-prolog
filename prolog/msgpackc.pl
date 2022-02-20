@@ -51,6 +51,9 @@ test(fixint) :-
                msgpack_pack_to_codes(A, [B])
            )).
 
+test(float32, [A == [0xca, 0, 0, 0, 0]]) :-
+    msgpackc:msgpack_pack_to_codes(0.0, A).
+
 :- end_tests(msgpack_pack_to_codes).
 
 %!  msgpack_pack_to_memory_file(+MemoryFile, +Term) is det.
