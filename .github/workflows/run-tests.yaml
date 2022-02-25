@@ -18,4 +18,10 @@ jobs:
           - {os: windows-latest}
           - {os: ubuntu-latest}
     steps:
+      - name: Install SWI-Prolog
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-add-repository ppa:swi-prolog/devel
+          sudo apt-get update
+          sudo apt-get install swi-prolog
       - uses: actions/checkout@v2
