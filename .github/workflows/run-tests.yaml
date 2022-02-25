@@ -12,10 +12,10 @@ jobs:
     name: ${{matrix.config.os}}
     strategy:
       fail-fast: false
-    matrix:
-      config:
-        - {os: macos-latest}
-        - {os: windows-latest}
-        - {os: ubuntu-latest}
+      matrix:
+        config:
+          - {os: macos-latest}
+          - {os: windows-latest}
+          - {os: ubuntu-latest}
     steps:
       - uses: actions/checkout@v2
