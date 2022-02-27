@@ -1,6 +1,11 @@
 #include <SWI-Prolog.h>
 #include <SWI-Stream.h>
 
+static foreign_t
+byte_order1(term_t ByteOrder)
+{ return PL_unify_integer(ByteOrder, __BYTE_ORDER__);
+}
+
 #include "msgpack.h"
 
 foreign_t version1(term_t Version)
