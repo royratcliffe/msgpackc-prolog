@@ -34,3 +34,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install pack
         run: swipl -t "pack_install(., [interactive(false)])"
+      - name: Run tests
+        run: |
+          run_tests.
+        shell: swipl -s {0}
