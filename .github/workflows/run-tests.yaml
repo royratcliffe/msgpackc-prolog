@@ -43,3 +43,5 @@ jobs:
       - name: Check installation
         run: swipl -g check_installation -t halt
       - uses: actions/checkout@v2
+      - name: Install pack
+        run: swipl -t "once(pack_install(.))"
