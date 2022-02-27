@@ -35,7 +35,4 @@ jobs:
       - name: Install pack
         run: swipl -t "pack_install(., [interactive(false)])"
       - name: Run tests
-        run: |
-          :- initialization main.
-          main :- run_tests.
-        shell: swipl -s {0}
+        run: swipl -s .github/workflows/run_tests.pl -t halt
