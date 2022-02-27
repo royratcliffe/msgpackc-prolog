@@ -33,4 +33,4 @@ jobs:
         run: swipl -t check_installation
       - uses: actions/checkout@v2
       - name: Install pack
-        run: swipl -t "once(pack_install(., [interactive(false)]))"
+        run: swipl -t "pack_install(., [interactive(false)])"
