@@ -25,7 +25,8 @@ foreign_t version3(term_t Major, term_t Minor, term_t Revision)
 }
 
 install_t install_msgpackc()
-{ PL_register_foreign("msgpack_version", 1, version1, 0);
+{ PL_register_foreign("byte_order", 1, byte_order1, 0);
+  PL_register_foreign("msgpack_version", 1, version1, 0);
   PL_register_foreign("msgpack_version", 3, version3, 0);
 }
 
