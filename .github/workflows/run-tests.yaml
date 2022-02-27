@@ -41,7 +41,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install swi-prolog
       - name: Check installation
-        run: swipl -g check_installation -t halt
+        run: swipl -t check_installation
       - uses: actions/checkout@v2
       - name: Install pack
         run: swipl -t "once(pack_install(., [interactive(false)]))"
