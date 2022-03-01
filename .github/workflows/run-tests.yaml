@@ -24,3 +24,5 @@ jobs:
         run: swipl -t "pack_install(., [interactive(false)])"
       - name: Run tests
         run: swipl -g "[library(msgpackc)]" -s .github/workflows/run-tests.pl
+      - name: Run pack tests with coverage
+        uses: royratcliffe/swi-prolog-show-coverage@pack-cover
