@@ -15,14 +15,5 @@ jobs:
       matrix:
         os: [macOS, Windows, Ubuntu]
     steps:
-      - name: Install SWI-Prolog
-        uses: royratcliffe/swi-prolog-actions@action-yml
-      - name: Check installation
-        run: swipl -t check_installation
       - uses: actions/checkout@v2
-      - name: Install pack
-        run: swipl -t "pack_install(., [interactive(false), link(false)])"
-      - name: Run tests
-        run: swipl -g "[library(msgpackc)]" -s .github/workflows/run-tests.pl
-      - name: Run pack tests with coverage
-        uses: royratcliffe/swi-prolog-show-coverage@pack-cover
+      - uses: royratcliffe/swi-prolog-pack-cover@action
