@@ -1,6 +1,11 @@
 #include <SWI-Prolog.h>
 #include <SWI-Stream.h>
 
+static foreign_t
+byte_order1(term_t ByteOrder)
+{ return PL_unify_integer(ByteOrder, __BYTE_ORDER__);
+}
+
 #include "msgpack.h"
 
 foreign_t version1(term_t Version)
@@ -20,7 +25,8 @@ foreign_t version3(term_t Major, term_t Minor, term_t Revision)
 }
 
 install_t install_msgpackc()
-{ PL_register_foreign("msgpack_version", 1, version1, 0);
+{ PL_register_foreign("byte_order", 1, byte_order1, 0);
+  PL_register_foreign("msgpack_version", 1, version1, 0);
   PL_register_foreign("msgpack_version", 3, version3, 0);
 }
 
