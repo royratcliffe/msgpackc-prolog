@@ -7,7 +7,7 @@ on:
 name: Pack install and test with coverage
 
 jobs:
-  run-tests:
+  pack-cover:
     runs-on: ${{ matrix.os }}-latest
     name: ${{ matrix.os }}
     strategy:
