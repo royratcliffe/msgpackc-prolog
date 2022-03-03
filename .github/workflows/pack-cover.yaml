@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main, master]
 
-name: Pack install and test with coverage
+name: test
 
 jobs:
   pack-cover:
