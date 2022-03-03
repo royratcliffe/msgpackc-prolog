@@ -52,6 +52,11 @@ fixint(8, Integer) -->
     !.
 fixint(8, Integer) -->
     { integer(Integer),
+      % Now that Integer is a non-variable and an integer, just reverse
+      % the Integer from Byte solution above: swap the sides, add 256 to
+      % both sides and swap the compute and threshold comparison; at
+      % this point Integer must be negative. Grammar at byte//1 will
+      % catch Integer values greater than 255.
       Byte is 0x100 + Integer,
       Byte >= 0xe0
     },
