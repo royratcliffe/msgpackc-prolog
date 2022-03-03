@@ -5,11 +5,12 @@
 */
 
 :- module(msgpackc,
-          [ msgpack_object//1                   % ?Term
+          [ msgpack_object//1,                  % ?Object
+            msgpack_objects//1                  % ?Objects
           ]).
 :- use_foreign_library(foreign(msgpackc)).
 
-%!  msgpack_object(?Term)// is semidet.
+%!  msgpack_object(?Object)// is semidet.
 %
 %   Encodes and decodes a single Message Pack object. Term encodes an
 %   object as follows.
@@ -25,3 +26,15 @@
 %       3. Maps become Prolog dictionaries.
 
 msgpack_object(nil) --> [0xc0].
+msgpack_object(false) --> [0xc2].
+msgpack_object(true) --> [0xc3].
+
+%!  msgpack_objects(?Objects)// is semidet.
+%
+%   Zero or more Message Pack objects.
+
+msgpack_objects([Object|Objects]) -->
+    msgpack_object(Object),
+    !,
+    msgpack_objects(Objects).
+msgpack_objects([]) --> [].
