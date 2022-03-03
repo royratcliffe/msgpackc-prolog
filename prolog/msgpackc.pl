@@ -5,10 +5,23 @@
 */
 
 :- module(msgpackc,
-          [ msgpack//1
+          [ msgpack_object//1                   % ?Term
           ]).
 :- use_foreign_library(foreign(msgpackc)).
 
-%!  msgpack(?Term)// is semidet.
+%!  msgpack_object(?Term)// is semidet.
+%
+%   Encodes and decodes a single Message Pack object. Term encodes an
+%   object as follows.
+%
+%       1. The _nil_ object becomes Prolog `nil` atom rather than `[]`
+%       which Prolog calls nil, the empty list termination. Prolog `[]`
+%       decodes an empty Message Pack array.
+%       2. Booleans become Prolog atoms `false` and `true`.
+%       3. Integers become Prolog integers.
+%       4. Floats become Prolog floats.
+%       2. Strings in UTF-8 become Prolog strings, never atoms.
+%       2. Arrays become Prolog lists.
+%       3. Maps become Prolog dictionaries.
 
-msgpack([]) --> [0xc0].
+msgpack_object(nil) --> [0xc0].
