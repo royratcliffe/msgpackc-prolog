@@ -11,7 +11,7 @@
  * buffer with the value of the bytes successfully seen.
  */
 int
-get_list_bytes(term_t Bytes0, term_t Bytes, size_t count, unsigned char *bytes)
+get_list_bytes(term_t Bytes0, term_t Bytes, size_t count, uint8_t *bytes)
 { term_t Tail = PL_copy_term_ref(Bytes0);
   term_t Byte = PL_new_term_ref();
   while (count--)
@@ -28,7 +28,7 @@ get_list_bytes(term_t Bytes0, term_t Bytes, size_t count, unsigned char *bytes)
  * signed integer _without_ performing sign extension.
  */
 int
-unify_list_bytes(term_t Bytes0, term_t Bytes, size_t count, const unsigned char *bytes)
+unify_list_bytes(term_t Bytes0, term_t Bytes, size_t count, const uint8_t *bytes)
 { term_t Tail = PL_copy_term_ref(Bytes0);
   term_t Byte = PL_new_term_ref();
   while (count--)
@@ -46,8 +46,8 @@ unify_list_bytes(term_t Bytes0, term_t Bytes, size_t count, const unsigned char 
  * 66 c1 c0 08          rol    $0x8,%ax
  * c3                   ret
  */
-unsigned short
-be16(unsigned short xx)
+uint16_t
+be16(uint16_t xx)
 { return xx << 8 | xx >> 8;
 }
 
@@ -58,9 +58,9 @@ be16(unsigned short xx)
  * 0f c8                bswap  %eax
  * c3                   ret
  */
-unsigned long
-be32(unsigned long xxxx)
-{ return (unsigned long)be16(xxxx) << 16 | be16(xxxx >> 16);
+uint32_t
+be32(uint32_t xxxx)
+{ return (uint32_t)be16(xxxx) << 16 | be16(xxxx >> 16);
 }
 
 /*
@@ -70,43 +70,49 @@ be32(unsigned long xxxx)
  * 48 0f c8             bswap  %rax
  * c3                   ret
  */
-unsigned long long
-be64(unsigned long long xxxxxxxx)
-{ return (unsigned long long)be32(xxxxxxxx) << 32 | be32(xxxxxxxx >> 32);
+uint64_t
+be64(uint64_t xxxxxxxx)
+{ return (uint64_t)be32(xxxxxxxx) << 32 | be32(xxxxxxxx >> 32);
 }
 
 #else
 
-unsigned short
-be16(unsigned short xx)
+uint16_t
+be16(uint16_t xx)
 { return xx;
 }
 
-unsigned long
-be32(unsigned long xxxx)
+uint32_t
+be32(uint32_t xxxx)
 { return xxxx;
 }
 
-unsigned long long
-be64(unsigned long long xxxxxxxx)
+uint64_t
+be64(uint64_t xxxxxxxx)
 { return xxxxxxxx;
 }
 
 #endif
 
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Important to realise that unsigned long is not always 32-bits wide. On some machines and operating systems, any `long` is 64-bits wide. Same goes for float; some platforms make them identical to doubles.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 union xx
-{ unsigned short value;
-  unsigned char bytes[sizeof(unsigned short)];
+{ uint16_t value;
+  uint8_t bytes[sizeof(uint16_t)];
 };
 
 union xxxx
 { uint32_t value;
-  unsigned char bytes[sizeof(uint32_t)];
+  uint8_t bytes[sizeof(uint32_t)];
 };
 
 union xxxxxxxx
-{ unsigned long long value;
-  unsigned char bytes[sizeof(unsigned long long)];
+{ uint64_t value;
+  uint8_t bytes[sizeof(uint64_t)];
 };
 
 /*
@@ -120,23 +126,23 @@ union xxxxxxxx
  * c3                   ret
  */
 float
-reinterpret_to_float32(unsigned long xxxx)
+reinterpret_to_float32(uint32_t xxxx)
 { return *(float *)&xxxx;
 }
 
-unsigned long
+uint32_t
 reinterpret_from_float32(float xxxx)
-{ return *(unsigned long *)&xxxx;
+{ return *(uint32_t *)&xxxx;
 }
 
 double
-reinterpret_to_float64(unsigned long long xxxxxxxx)
+reinterpret_to_float64(uint64_t xxxxxxxx)
 { return *(double *)&xxxxxxxx;
 }
 
-unsigned long long
+uint64_t
 reinterpret_from_float64(double xxxxxxxx)
-{ return *(unsigned long long *)&xxxxxxxx;
+{ return *(uint64_t *)&xxxxxxxx;
 }
 
 foreign_t
