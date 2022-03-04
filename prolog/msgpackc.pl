@@ -258,10 +258,9 @@ msgpack_fixstr(String) -->
       string_codes(String, Codes),
       phrase(utf8_codes(Codes), Bytes),
       length(Bytes, Length),
-      Byte is Length + 0b101 00000,
+      Byte is 0b101 00000 + Length,
       Byte >= 0b101 00000,
-      Byte =< 0b101 11111,
-      true
+      Byte =< 0b101 11111
     },
     byte(Byte),
     sequence(byte, Bytes).
