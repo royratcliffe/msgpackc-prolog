@@ -64,6 +64,23 @@ fixint(8, Integer) -->
     },
     byte(Byte).
 
+msgpack_bin(Bytes) -->
+    { var(Bytes)
+    },
+    !,
+    [0xc4],
+    byte(Length),
+    { length(Bytes, Length)
+    },
+    sequence(byte, Bytes).
+msgpack_bin(Bytes) -->
+    { is_list(Bytes),
+      length(Bytes, Length)
+    },
+    [0xc4],
+    byte(Length),
+    sequence(byte, Bytes).
+
 %!  byte(Byte)// is semidet.
 %
 %   Simplifies the Message Pack grammar by asserting Byte constraints.
