@@ -66,4 +66,9 @@ test(msgpack_fixstr, true(B == "hello")) :-
 test(msgpack_fixstr, true(B == [163, 229, 165, 189])) :-
     string_codes(A, [22909]), phrase(msgpack_fixstr(A), B).
 
+test(msgpack_str8, true(B == [217, 3, 229, 165, 189])) :-
+    string_codes(A, [22909]), phrase(msgpack_str8(A), B).
+test(msgpack_str8, true(B == [22909])) :-
+    phrase(msgpack_str8(A), [217, 3, 229, 165, 189]), string_codes(A, B).
+
 :- end_tests(msgpackc).
