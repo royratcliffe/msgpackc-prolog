@@ -109,12 +109,6 @@ be64(uint64_t xxxxxxxx)
 
 #endif
 
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-Important to realise that unsigned long is not always 32-bits wide. On some machines and operating systems, any `long` is 64-bits wide. Same goes for float; some platforms make them identical to doubles.
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-
 union xx
 { uint16_t value;
   uint8_t bytes[sizeof(uint16_t)];
