@@ -54,7 +54,7 @@ fixint(8, Integer) -->
     !.
 fixint(8, Integer) -->
     { integer(Integer),
-      % Now that Integer is a non-variable and an integer, just reverse
+      % Now that Integer is non-variable and an integer, just reverse
       % the Integer from Byte solution above: swap the sides, add 256 to
       % both sides and swap the compute and threshold comparison; at
       % this point Integer must be negative. Grammar at byte//1 will
@@ -84,9 +84,10 @@ msgpack_bin(Bytes) -->
 %!  byte(Byte)// is semidet.
 %
 %   Simplifies the Message Pack grammar by asserting Byte constraints.
-%   Every Byte is an integer in-between 0 and 255 inclusive. Other
-%   high-level grammer components can presume these contraints as a
-%   baseline and assert any addition limits appropriately.
+%   Every Byte is an integer in-between 0 and 255 inclusive; fails
+%   semi-deterministically otherwise. Other high-level grammer
+%   components can presume these contraints as a baseline and assert any
+%   addition limits appropriately.
 
 byte(Byte) -->
     [Byte],
