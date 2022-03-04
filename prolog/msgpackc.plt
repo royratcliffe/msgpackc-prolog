@@ -25,10 +25,17 @@ test(msgpack_objects, [true(A == [nil, false, true])]) :-
 test(msgpack_objects, [true(A == [0xc0, 0xc2, 0xc3])]) :-
     phrase(msgpack_objects([nil, false, true]), A).
 
-test(float32, [true(A-B == [0, 0, 0, 0|B]-B)]) :- msgpackc:msgpack_float32(0, A, B).
-test(float32, [true(A == [63, 128, 0, 0])]) :- phrase(msgpackc:msgpack_float32(1.0), A).
+test(float32, [true(A-B == [0, 0, 0, 0|B]-B)]) :-
+    msgpackc:float32(0, A, B).
+test(float32, [true(A == [63, 128, 0, 0])]) :-
+    phrase(msgpackc:float32(1.0), A).
 test(float32, [true(A-B == [127, 128, 0, 0]- 1.0Inf)]) :-
-    phrase(msgpackc:msgpack_float32(1.0Inf), A),
-    phrase(msgpackc:msgpack_float32(B), A).
+    phrase(msgpackc:float32(1.0Inf), A),
+    phrase(msgpackc:float32(B), A).
+test(float32, [true(A == [127, 192, 0, 0])]) :-
+    NaN is nan,
+    phrase(msgpackc:float32(NaN), A).
+test(float32, [true(A == 1.5NaN)]) :-
+    phrase(msgpackc:float32(A), [0x7f, 0xff, 0xff, 0xff]).
 
 :- end_tests(msgpackc).

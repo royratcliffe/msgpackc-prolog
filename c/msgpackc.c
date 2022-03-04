@@ -139,7 +139,7 @@ reinterpret_from_float64(double xxxxxxxx)
 }
 
 foreign_t
-msgpack_float32_3(term_t Number, term_t Bytes0, term_t Bytes)
+float32_3(term_t Number, term_t Bytes0, term_t Bytes)
 { double value;
   union xxxx raw;
   if (PL_is_variable(Number))
@@ -153,7 +153,7 @@ msgpack_float32_3(term_t Number, term_t Bytes0, term_t Bytes)
 }
 
 foreign_t
-msgpack_float64_3(term_t Number, term_t Bytes0, term_t Bytes)
+float64_3(term_t Number, term_t Bytes0, term_t Bytes)
 { double value;
   union xxxxxxxx raw;
   if (PL_is_variable(Number))
@@ -167,8 +167,8 @@ msgpack_float64_3(term_t Number, term_t Bytes0, term_t Bytes)
 }
 
 install_t install_msgpackc()
-{ PL_register_foreign("msgpack_float32", 3, msgpack_float32_3, 0);
-  PL_register_foreign("msgpack_float64", 3, msgpack_float64_3, 0);
+{ PL_register_foreign("float32", 3, float32_3, 0);
+  PL_register_foreign("float64", 3, float64_3, 0);
 }
 
 install_t uninstall_msgpackc()
