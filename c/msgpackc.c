@@ -1,5 +1,6 @@
 #include <SWI-Prolog.h>
 #include <SWI-Stream.h>
+#include <stdint.h>
 
 /*
  * Gets a list of bytes from a list of byte codes by byte count. Fails
