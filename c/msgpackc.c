@@ -161,8 +161,37 @@ reinterpret_from_float64(double xxxxxxxx)
 { return *(unsigned long long *)&xxxxxxxx;
 }
 
+foreign_t
+msgpack_float32_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ double value;
+  union float32 raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_float(Number, reinterpret_to_float32(be32(raw.value)));
+  } else
+  { if (!PL_get_float(Number, &value)) PL_fail;
+    raw.value = be32(reinterpret_from_float32(value));
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
+foreign_t
+msgpack_float64_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ double value;
+  union float64 raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_float(Number, reinterpret_to_float64(be64(raw.value)));
+  } else
+  { if (!PL_get_float(Number, &value)) PL_fail;
+    raw.value = be64(reinterpret_from_float64(value));
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
 install_t install_msgpackc()
-{ ;
+{ PL_register_foreign("msgpack_float32", 3, msgpack_float32_3, 0);
+  PL_register_foreign("msgpack_float64", 3, msgpack_float64_3, 0);
 }
 
 install_t uninstall_msgpackc()
