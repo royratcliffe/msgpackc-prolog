@@ -173,9 +173,99 @@ float64_3(term_t Number, term_t Bytes0, term_t Bytes)
   }
 }
 
+foreign_t
+uint16_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ union xx raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_uint64(Number, be16(raw.value));
+  } else
+  { uint64_t value;
+    if (!PL_get_uint64(Number, &value)) PL_fail;
+    raw.value = be16(value);
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
+foreign_t
+uint32_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ union xxxx raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_uint64(Number, be32(raw.value));
+  } else
+  { uint64_t value;
+    if (!PL_get_uint64(Number, &value)) PL_fail;
+    raw.value = be32(value);
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
+foreign_t
+uint64_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ union xxxxxxxx raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_uint64(Number, be64(raw.value));
+  } else
+  { uint64_t value;
+    if (!PL_get_uint64(Number, &value)) PL_fail;
+    raw.value = be64(value);
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
+foreign_t
+int16_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ union xx raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_int64(Number, be16(raw.value));
+  } else
+  { int64_t value;
+    if (!PL_get_int64(Number, &value)) PL_fail;
+    raw.value = be16(value);
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
+foreign_t
+int32_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ union xxxx raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_int64(Number, be32(raw.value));
+  } else
+  { int64_t value;
+    if (!PL_get_int64(Number, &value)) PL_fail;
+    raw.value = be32(value);
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
+foreign_t
+int64_3(term_t Number, term_t Bytes0, term_t Bytes)
+{ union xxxxxxxx raw;
+  if (PL_is_variable(Number))
+  { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    return PL_unify_int64(Number, be64(raw.value));
+  } else
+  { int64_t value;
+    if (!PL_get_int64(Number, &value)) PL_fail;
+    raw.value = be64(value);
+    return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
+  }
+}
+
 install_t install_msgpackc()
 { PL_register_foreign("float32", 3, float32_3, 0);
   PL_register_foreign("float64", 3, float64_3, 0);
+  PL_register_foreign("uint16", 3, uint16_3, 0);
+  PL_register_foreign("uint32", 3, uint32_3, 0);
+  PL_register_foreign("uint64", 3, uint64_3, 0);
+  PL_register_foreign("int16", 3, int16_3, 0);
+  PL_register_foreign("int32", 3, int32_3, 0);
+  PL_register_foreign("int64", 3, int64_3, 0);
 }
 
 install_t uninstall_msgpackc()
