@@ -240,6 +240,9 @@ msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
 %   0 and 31 inclusive.
 
 msgpack_fixstr(String) -->
+    { var(String)
+    },
+    !,
     byte(Byte),
     { Byte >= 0b101 00000,
       Byte =< 0b101 11111,
@@ -247,6 +250,18 @@ msgpack_fixstr(String) -->
       length(Bytes, Length)
     },
     sequence(byte, Bytes),
-    { memory_file_bytes(MemoryFile, Bytes),
-      memory_file_to_string(MemoryFile, String, utf8)
+    { phrase(utf8_codes(Codes), Bytes),
+      string_codes(String, Codes)
     }.
+msgpack_fixstr(String) -->
+    { string(String),
+      string_codes(String, Codes),
+      phrase(utf8_codes(Codes), Bytes),
+      length(Bytes, Length),
+      Byte is Length + 0b101 00000,
+      Byte >= 0b101 00000,
+      Byte =< 0b101 11111,
+      true
+    },
+    byte(Byte),
+    sequence(byte, Bytes).

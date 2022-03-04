@@ -60,5 +60,10 @@ test(msgpack_fixstr, true(A == "")) :-
     phrase(msgpack_fixstr(A), [0b101 00000]).
 test(msgpack_fixstr, true(A == "hello")) :-
     phrase(msgpack_fixstr(A), [0b101 00101|`hello`]).
+test(msgpack_fixstr, true(B == "hello")) :-
+    phrase(msgpack_fixstr("hello"), A),
+    phrase(msgpack_fixstr(B), A).
+test(msgpack_fixstr, true(B == [163, 229, 165, 189])) :-
+    string_codes(A, [22909]), phrase(msgpack_fixstr(A), B).
 
 :- end_tests(msgpackc).
