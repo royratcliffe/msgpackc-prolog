@@ -25,4 +25,10 @@ test(msgpack_objects, [true(A == [nil, false, true])]) :-
 test(msgpack_objects, [true(A == [0xc0, 0xc2, 0xc3])]) :-
     phrase(msgpack_objects([nil, false, true]), A).
 
+test(float32, [true(A-B == [0, 0, 0, 0|B]-B)]) :- msgpackc:msgpack_float32(0, A, B).
+test(float32, [true(A == [63, 128, 0, 0])]) :- phrase(msgpackc:msgpack_float32(1.0), A).
+test(float32, [true(A-B == [127, 128, 0, 0]- 1.0Inf)]) :-
+    phrase(msgpackc:msgpack_float32(1.0Inf), A),
+    phrase(msgpackc:msgpack_float32(B), A).
+
 :- end_tests(msgpackc).
