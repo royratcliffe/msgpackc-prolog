@@ -132,6 +132,12 @@ union float64
 };
 
 /*
+ * Performs the C equivalent of a C++ reinterpret cast from 32-bit
+ * unsigned integer to 32-bit float. Temporarily takes the address of a
+ * stack-passed integer, recasts the pointer's target and indirects to
+ * the recasting. The compiler optimiser obviates all the indirection.
+ * The result is just a register-register move operation.
+ *
  * 66 0f 6e c1          movd   %ecx,%xmm0
  * c3                   ret
  */
