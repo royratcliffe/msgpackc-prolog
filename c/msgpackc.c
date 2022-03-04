@@ -2,7 +2,8 @@
 #include <SWI-Stream.h>
 
 /*
- * Gets a list of bytes from a list of byte codes by byte count.
+ * Gets a list of bytes from a list of byte codes by byte count. Fails
+ * if the byte list reaches nil _before_ reading all the bytes.
  *
  * Fails if it sees integer byte values outside the acceptable range,
  * zero through 255 inclusive. Failure always updates the given byte
@@ -12,9 +13,10 @@ int
 get_list_bytes(term_t Bytes0, term_t Bytes, size_t count, unsigned char *bytes)
 { term_t Tail = PL_copy_term_ref(Bytes0);
   term_t Byte = PL_new_term_ref();
-  while (count-- && PL_get_list(Tail, Byte, Tail))
+  while (count--)
   { int value;
-    if (!PL_get_integer(Byte, &value) || value < 0 || value > 255) PL_fail;
+    if (!PL_get_list(Tail, Byte, Tail) ||
+        !PL_get_integer(Byte, &value) || value < 0 || value > 255) PL_fail;
     *bytes++ = value;
   }
   return PL_unify(Bytes, Tail);
