@@ -1,5 +1,20 @@
 #include <SWI-Prolog.h>
 #include <SWI-Stream.h>
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Important to realise that unsigned long is not always 32-bits wide. On
+some machines and operating systems, any `long` is 64-bits wide. Same
+goes for float; some platforms make them identical to doubles.
+Fundamentally it all depends on the compiler itself.
+
+Explicitly include header `stdint.h` although strictly-speaking
+unnecessary because SWI-Prolog import and uses `int64_t` and `uint64_t`
+types from the same header and therefore includes it. It stands here as
+a note for the direct dependency.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 #include <stdint.h>
 
 /*
@@ -124,6 +139,10 @@ union xxxxxxxx
  *
  * 66 0f 6e c1          movd   %ecx,%xmm0
  * c3                   ret
+ *
+ * Thirty two bits is the important assumption here. What happens if
+ * `float` is a 64-bit `double`? 64-bit operating systems like macOS and
+ * Linux may decide to make 32-bit floats match 64-bit doubles.
  */
 float
 reinterpret_to_float32(uint32_t xxxx)
