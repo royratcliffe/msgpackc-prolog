@@ -8,6 +8,8 @@
           [ msgpack_object//1,                  % ?Object
             msgpack_objects//1                  % ?Objects
           ]).
+:- autoload(library(dcg/high_order), [sequence/4]).
+
 :- use_foreign_library(foreign(msgpackc)).
 
 %!  msgpack_object(?Object)// is semidet.
