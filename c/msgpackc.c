@@ -91,44 +91,19 @@ be64(unsigned long long xxxxxxxx)
 
 #endif
 
-union uint16
+union xx
 { unsigned short value;
   unsigned char bytes[sizeof(unsigned short)];
 };
 
-union uint32
+union xxxx
 { unsigned long value;
   unsigned char bytes[sizeof(unsigned long)];
 };
 
-union uint64
+union xxxxxxxx
 { unsigned long long value;
   unsigned char bytes[sizeof(unsigned long long)];
-};
-
-union int16
-{ short value;
-  unsigned char bytes[sizeof(short)];
-};
-
-union int32
-{ long value;
-  unsigned char bytes[sizeof(long)];
-};
-
-union int64
-{ long long value;
-  unsigned char bytes[sizeof(long long)];
-};
-
-union float32
-{ float value;
-  unsigned char bytes[sizeof(float)];
-};
-
-union float64
-{ double value;
-  unsigned char bytes[sizeof(double)];
 };
 
 /*
@@ -164,7 +139,7 @@ reinterpret_from_float64(double xxxxxxxx)
 foreign_t
 msgpack_float32_3(term_t Number, term_t Bytes0, term_t Bytes)
 { double value;
-  union float32 raw;
+  union xxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
     return PL_unify_float(Number, reinterpret_to_float32(be32(raw.value)));
@@ -178,7 +153,7 @@ msgpack_float32_3(term_t Number, term_t Bytes0, term_t Bytes)
 foreign_t
 msgpack_float64_3(term_t Number, term_t Bytes0, term_t Bytes)
 { double value;
-  union float64 raw;
+  union xxxxxxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
     return PL_unify_float(Number, reinterpret_to_float64(be64(raw.value)));
