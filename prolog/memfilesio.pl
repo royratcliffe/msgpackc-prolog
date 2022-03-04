@@ -72,3 +72,19 @@ put_bytes([Byte|Bytes]) => put_byte(Byte), put_bytes(Bytes).
 write_to_memory_file(Term, MemoryFile) :-
     new_memory_file(MemoryFile),
     with_output_to_memory_file(write(Term), MemoryFile, [encoding(octet)]).
+
+%!  string_to_bytes(+String, -Bytes) is det.
+%
+%   String to Bytes via a temporary memory file used for UTF-8 to octet
+%   encoding and decoding.
+
+string_to_bytes(String, Bytes) :-
+    setup_call_cleanup(
+        new_memory_file(MemoryFile),
+        (   with_output_to_memory_file(write(String), MemoryFile,
+                                       [ encoding(utf8)
+                                       ]),
+            memory_file_to_codes(MemoryFile, Bytes, octet)
+        ),
+        free_memory_file(MemoryFile)
+    ).
