@@ -20,7 +20,7 @@ test(bin, [true(A == [])]) :-
 test(bin, [true(A == [1, 2, 3])]) :-
     phrase(msgpackc:msgpack_bin(A), [0xc4, 3, 1, 2, 3]).
 
-test(msgpack_objects, [true(A == [nil, false, true])]) :-
+test(msgpack_objects, [true(A == [nil, false, true]), nondet]) :-
     phrase(msgpack_objects(A), [0xc0, 0xc2, 0xc3]).
 test(msgpack_objects, [true(A == [0xc0, 0xc2, 0xc3])]) :-
     phrase(msgpack_objects([nil, false, true]), A).
@@ -55,5 +55,10 @@ test(int, all(A-B == [ 8-[0xff],
                        64-[0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff]
                      ])) :-
     phrase(msgpackc:int(A, -1), B).
+
+test(msgpack_fixstr, true(A == "")) :-
+    phrase(msgpack_fixstr(A), [0b101 00000]).
+test(msgpack_fixstr, true(A == "hello")) :-
+    phrase(msgpack_fixstr(A), [0b101 00101|`hello`]).
 
 :- end_tests(msgpackc).

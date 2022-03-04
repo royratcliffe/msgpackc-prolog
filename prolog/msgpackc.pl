@@ -8,11 +8,14 @@
           [ msgpack_object//1,                  % ?Object
             msgpack_objects//1,                 % ?Objects
             msgpack_float//2,                   % ?Width,?Float
-            msgpack_float//1                    % ?Float
+            msgpack_float//1,                   % ?Float
+            msgpack_fixstr//1                   % ?String
           ]).
 :- autoload(library(dcg/high_order), [sequence//2]).
 
 :- use_foreign_library(foreign(msgpackc)).
+
+:- use_module(memfilesio).
 
 /** <module> C-Based Message Pack for SWI-Prolog
 
@@ -230,3 +233,20 @@ int8(Integer) -->
 %   Zero or more Message Pack objects.
 
 msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
+
+%!  msgpack_fixstr(?String)// is semidet.
+%
+%   Unifies Message Pack byte codes with fixed String of length between
+%   0 and 31 inclusive.
+
+msgpack_fixstr(String) -->
+    byte(Byte),
+    { Byte >= 0b101 00000,
+      Byte =< 0b101 11111,
+      Length is Byte - 0b101 00000,
+      length(Bytes, Length)
+    },
+    sequence(byte, Bytes),
+    { memory_file_bytes(MemoryFile, Bytes),
+      memory_file_to_string(MemoryFile, String, utf8)
+    }.
