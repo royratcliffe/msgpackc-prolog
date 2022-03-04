@@ -36,15 +36,18 @@
 msgpack_object(nil) --> [0xc0], !.
 msgpack_object(false) --> [0xc2], !.
 msgpack_object(true) --> [0xc3], !.
-msgpack_object(Byte) -->
+msgpack_object(Integer) --> msgpack_fixint(8, Integer).
+
+%!  msgpack_fixint(?Bits, ?Integer)// is semidet.
+%
+%   Bits is the integer bit width, either 8, 16, 32 or 64.
+
+msgpack_fixint(8, Byte) -->
     byte(Byte),
     { Byte =< 0x7f
     },
     !.
-msgpack_object(Integer) -->
-    fixint(8, Integer).
-
-fixint(8, Integer) -->
+msgpack_fixint(8, Integer) -->
     { var(Integer)
     },
     byte(Byte),
@@ -52,7 +55,7 @@ fixint(8, Integer) -->
       Integer is Byte - 0x100
     },
     !.
-fixint(8, Integer) -->
+msgpack_fixint(8, Integer) -->
     { integer(Integer),
       % Now that Integer is non-variable and an integer, just reverse
       % the Integer from Byte solution above: swap the sides, add 256 to
