@@ -147,13 +147,13 @@ reinterpret_from_float64(double xxxxxxxx)
 
 foreign_t
 float32_3(term_t Number, term_t Bytes0, term_t Bytes)
-{ double value;
-  union xxxx raw;
+{ union xxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
     return PL_unify_float(Number, reinterpret_to_float32(be32(raw.value)));
   } else
-  { if (!PL_get_float(Number, &value)) PL_fail;
+  { double value;
+    if (!PL_get_float(Number, &value)) PL_fail;
     raw.value = be32(reinterpret_from_float32(value));
     return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
   }
@@ -161,13 +161,13 @@ float32_3(term_t Number, term_t Bytes0, term_t Bytes)
 
 foreign_t
 float64_3(term_t Number, term_t Bytes0, term_t Bytes)
-{ double value;
-  union xxxxxxxx raw;
+{ union xxxxxxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
     return PL_unify_float(Number, reinterpret_to_float64(be64(raw.value)));
   } else
-  { if (!PL_get_float(Number, &value)) PL_fail;
+  { double value;
+    if (!PL_get_float(Number, &value)) PL_fail;
     raw.value = be64(reinterpret_from_float64(value));
     return unify_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes);
   }
