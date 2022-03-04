@@ -25,6 +25,10 @@ test(msgpack_objects, [true(A == [nil, false, true])]) :-
 test(msgpack_objects, [true(A == [0xc0, 0xc2, 0xc3])]) :-
     phrase(msgpack_objects([nil, false, true]), A).
 
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+C implements the float32//1 and float64//1 predicates.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 test(float32, [true(A-B == [0, 0, 0, 0|B]-B)]) :-
     msgpackc:float32(0, A, B).
 test(float32, [true(A == [63, 128, 0, 0])]) :-
@@ -37,5 +41,19 @@ test(float32, [true(A == [127, 192, 0, 0])]) :-
     phrase(msgpackc:float32(NaN), A).
 test(float32, [true(A == 1.5NaN)]) :-
     phrase(msgpackc:float32(A), [0x7f, 0xff, 0xff, 0xff]).
+
+test(uint, all(A-B == [ 8-[0],
+                        16-[0,0],
+                        32-[0,0,0,0],
+                        64-[0,0,0,0,0,0,0,0]
+                      ])) :-
+    phrase(msgpackc:uint(A, 0), B).
+
+test(int, all(A-B == [ 8-[0xff],
+                       16-[0xff,0xff],
+                       32-[0xff,0xff,0xff,0xff],
+                       64-[0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff]
+                     ])) :-
+    phrase(msgpackc:int(A, -1), B).
 
 :- end_tests(msgpackc).
