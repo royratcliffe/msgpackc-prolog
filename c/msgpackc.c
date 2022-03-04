@@ -99,8 +99,8 @@ union xx
 };
 
 union xxxx
-{ unsigned long value;
-  unsigned char bytes[sizeof(unsigned long)];
+{ uint32_t value;
+  unsigned char bytes[sizeof(uint32_t)];
 };
 
 union xxxxxxxx
