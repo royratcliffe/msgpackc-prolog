@@ -17,7 +17,7 @@ get_list_bytes(term_t Bytes0, term_t Bytes, size_t count, uint8_t *bytes)
   while (count--)
   { int value;
     if (!PL_get_list(Tail, Byte, Tail) ||
-        !PL_get_integer(Byte, &value) || value < 0 || value > 255) PL_fail;
+        !PL_get_integer(Byte, &value) || value < 0 || value > UINT8_MAX) PL_fail;
     *bytes++ = value;
   }
   return PL_unify(Bytes, Tail);
