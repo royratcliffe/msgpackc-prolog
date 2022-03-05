@@ -271,9 +271,9 @@ msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
 %   0 and 31 inclusive.
 
 msgpack_fixstr(String) -->
-    { var(String)
+    { var(String),
+      !
     },
-    !,
     byte(Byte),
     { Byte >= 0b101 00000,
       Byte =< 0b101 11111,
