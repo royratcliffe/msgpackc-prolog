@@ -567,7 +567,7 @@ fix_format_length(Fix, Format, Length), var(Format) =>
     Format is Min + Length,
     Format >= Min,
     Format =< Max.
-fix_format_length(Fix, Format, Length) =>
+fix_format_length(Fix, Format, Length), integer(Format) =>
     fix_min_max(Fix, Min, Max),
     Format >= Min,
     Format =< Max,
