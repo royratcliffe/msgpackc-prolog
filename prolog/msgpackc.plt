@@ -1,6 +1,11 @@
 :- begin_tests(msgpackc).
 :- use_module(msgpackc).
 
+test(msgpack, true(A == [0b1001 0001, 123])) :-
+    phrase(msgpackc:msgpack(array([int(123)])), A).
+test(msgpack, true(A == [0b1001 0001, 123])) :-
+    phrase(msgpackc:msgpack(array([array([int(1)])])), A).
+
 test(msgpack_object_nil, [true(A == [0xc0])]) :-
     phrase(msgpack_object(nil), A).
 test(msgpack_object_nil, [true(A == nil)]) :-

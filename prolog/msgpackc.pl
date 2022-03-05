@@ -5,13 +5,23 @@
 */
 
 :- module(msgpackc,
-          [ msgpack_object//1,                  % ?Object
+          [ msgpack//1,
+
+            msgpack_object//1,                  % ?Object
             msgpack_objects//1,                 % ?Objects
+
+            msgpack_nil//0,
+            msgpack_false//0,
+            msgpack_true//0,
+
             msgpack_float//2,                   % ?Width,?Float
             msgpack_float//1,                   % ?Float
+
+            % str format family
             msgpack_str//1,                     % ?String
             msgpack_fixstr//1,                  % ?String
             msgpack_str//2,                     % ?Width,?String
+
             msgpack_bin//2,                     % ?Width,?Bytes
             msgpack_bin//1                      % ?Bytes
           ]).
@@ -22,7 +32,19 @@
 
 :- use_foreign_library(foreign(msgpackc)).
 
+:- meta_predicate
+    msgpack_array(3, ?, ?, ?).
+
 /** <module> C-Based Message Pack for SWI-Prolog
+
+The predicates have three general categories.
+
+    1. High-order recursive for normal use by application software.
+    2. Parameterised mid-level grammar components such as `msgpack_nil`
+    designed for two-way unification between fundamental types and
+    their Message Pack byte encoded representations.
+    3. Low-level C predicates and functions interfacing with the machine
+    byte-swapping hardware.
 
 ## Optimal message packing
 
@@ -48,7 +70,11 @@ improvements might aggregate to milliseconds.
 %   themselves objects; arrays are objects hence arrays of arrays
 %   nested up to any number of dimensions. Same goes for maps.
 
-msgpack(int(Int)) --> msgpack_integer(Int), !.
+msgpack(nil) --> msgpack_nil, !.
+msgpack(bool(false)) --> msgpack_false, !.
+msgpack(bool(true)) --> msgpack_true, !.
+msgpack(int(Int)) --> msgpack_int(Int), !.
+msgpack(str(Str)) --> msgpack_str(Str), !.
 msgpack(array(Array)) --> msgpack_array(msgpack, Array).
 
 %!  msgpack_object(?Object)// is semidet.
@@ -81,7 +107,7 @@ msgpack_object(nil) --> [0xc0], !.
 msgpack_object(false) --> [0xc2], !.
 msgpack_object(true) --> [0xc3], !.
 msgpack_object(Integer) -->
-    msgpack_integer(Integer),
+    msgpack_int(Integer),
     { integer(Integer)
     },
     !.
@@ -100,6 +126,18 @@ attempting to open it.
 
 msgpack_object(MemoryFile) --> msgpack_memory_file(MemoryFile).
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+%!  msgpack_nil// is semidet.
+%!  msgpack_false// is semidet.
+%!  msgpack_true// is semidet.
+%
+%   The simplest packing formats for nil and Booleans.
+
+msgpack_nil --> [0xc0].
+
+msgpack_false --> [0xc2].
+
+msgpack_true --> [0xc3].
 
 %!  msgpack_float(?Width, ?Float)// is nondet.
 %!  msgpack_float(?Float)// is semidet.
@@ -133,7 +171,11 @@ msgpack_float(Float) -->
     [0xcb|Bytes].
 msgpack_float(Float) --> [0xca], float32(Float).
 
-%!  msgpack_integer(?Integer:integer)// is semidet.
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+%!  msgpack_int(?Integer:integer)// is semidet.
 %
 %   Finds the optimum integer representation, shortest first. Tries
 %   fixed integer at first which works for a small subset of integers
@@ -143,15 +185,15 @@ msgpack_float(Float) --> [0xca], float32(Float).
 %   assumes that the difference does not matter. An overlap exists
 %   between signed and unsigned integers.
 
-msgpack_integer(Integer) --> msgpack_fixint(_, Integer), !.
-msgpack_integer(Integer) -->
+msgpack_int(Integer) --> msgpack_fixint(_, Integer), !.
+msgpack_int(Integer) -->
     { integer(Integer),
       Integer < 0,
       !
     },
     msgpack_int(_, Integer).
-msgpack_integer(Integer) --> msgpack_uint(_, Integer), !.
-msgpack_integer(Integer) --> msgpack_int(_, Integer).
+msgpack_int(Integer) --> msgpack_uint(_, Integer), !.
+msgpack_int(Integer) --> msgpack_int(_, Integer).
 
 %!  msgpack_uint(?Width, ?Integer)// is nondet.
 %!  msgpack_int(?Width, ?Integer)// is nondet.
