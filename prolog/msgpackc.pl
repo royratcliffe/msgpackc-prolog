@@ -11,9 +11,13 @@
             msgpack_float//1,                   % ?Float
             msgpack_fixstr//1,                  % ?String
             msgpack_str//2,                     % ?Width,?String
-            msgpack_bin//2                      % ?Width,?Bytes
+            msgpack_bin//2,                     % ?Width,?Bytes
+            msgpack_bin//1                      % ?Bytes
           ]).
-:- autoload(library(dcg/high_order), [sequence//2]).
+:- autoload(library(dcg/high_order), [sequence//2, sequence/4]).
+:- autoload(library(utf8), [utf8_codes/3]).
+
+:- use_module(memfilesio).
 
 :- use_foreign_library(foreign(msgpackc)).
 
@@ -71,7 +75,10 @@ msgpack_object(Integer) -->
 msgpack_object(Float) -->
     msgpack_float(Float),
     { float(Float)
-    }.
+    },
+    !.
+msgpack_object(String) --> msgpack_str(_, String), !.
+msgpack_object(MemoryFile) --> msgpack_memory_file(MemoryFile).
 
 %!  msgpack_float(?Width, ?Float)// is nondet.
 %!  msgpack_float(?Float)// is semidet.
@@ -368,3 +375,25 @@ msgpack_bin(Width, Bytes) -->
 bin_width_byte( 8, 0xc4).
 bin_width_byte(16, 0xc5).
 bin_width_byte(32, 0xc6).
+
+%!  msgpack_bin(?Bytes)// is semidet.
+%
+%   Succeeds only once when Bytes unifies with the Message Pack byte
+%   stream for the first time. Relies on the width ordering: low to
+%   high and attempts 8 bits first, 16 bits next and finally 32. Fails
+%   if 32 bits is not enough to unify the number of bytes because the
+%   byte-list has more than four thousand megabytes.
+
+msgpack_bin(Bytes) --> msgpack_bin(_, Bytes), !.
+
+msgpack_memory_file(MemoryFile) -->
+    { var(MemoryFile),
+      !
+    },
+    msgpack_bin(Bytes),
+    { memory_file_bytes(MemoryFile, Bytes)
+    }.
+msgpack_memory_file(MemoryFile) -->
+    { memory_file_bytes(MemoryFile, Bytes)
+    },
+    msgpack_bin(Bytes).
