@@ -145,18 +145,6 @@ msgpack(array(Array)) --> msgpack_array(msgpack, Array), !.
 msgpack(map(Map)) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map), !.
 msgpack(Term) --> msgpack_ext(Term).
 
-msgpack_ext(Term) -->
-    { ground(Term),
-      !,
-      type_ext_hook(Type, Ext, Term)
-    },
-    msgpack_ext(Type, Ext).
-msgpack_ext(Term) -->
-    msgpack_ext(Type, Ext),
-    !,
-    { type_ext_hook(Type, Ext, Term)
-    }.
-
 %!  msgpack_object(?Object)// is semidet.
 %
 %   Encodes and decodes a single Message Pack object. Term encodes an
@@ -694,6 +682,18 @@ msgpack_pair(OnKey, OnValue, Key-Value) -->
     ext format family
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+msgpack_ext(Term) -->
+    { ground(Term),
+      !,
+      type_ext_hook(Type, Ext, Term)
+    },
+    msgpack_ext(Type, Ext).
+msgpack_ext(Term) -->
+    msgpack_ext(Type, Ext),
+    !,
+    { type_ext_hook(Type, Ext, Term)
+    }.
 
 msgpack_ext(Type, Ext) --> msgpack_fixext(Type, Ext), !.
 msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext), !.
