@@ -28,8 +28,6 @@
 :- autoload(library(dcg/high_order), [sequence//2, sequence/4]).
 :- autoload(library(utf8), [utf8_codes/3]).
 
-:- use_module(memfilesio).
-
 :- use_foreign_library(foreign(msgpackc)).
 
 :- meta_predicate
@@ -475,18 +473,6 @@ bin_width_format(32, 0xc6).
 %   byte-list has more than four thousand megabytes.
 
 msgpack_bin(Bytes) --> msgpack_bin(_, Bytes), !.
-
-msgpack_memory_file(MemoryFile) -->
-    { var(MemoryFile),
-      !
-    },
-    msgpack_bin(Bytes),
-    { memory_file_bytes(MemoryFile, Bytes)
-    }.
-msgpack_memory_file(MemoryFile) -->
-    { memory_file_bytes(MemoryFile, Bytes)
-    },
-    msgpack_bin(Bytes).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
