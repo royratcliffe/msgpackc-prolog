@@ -356,25 +356,25 @@ str_width_format(32, 0xdb).
 msgpack_bin(Width, Bytes) -->
     { var(Bytes),
       !,
-      bin_width_byte(Width, Byte)
+      bin_width_format(Width, Format)
     },
-    [Byte],
+    [Format],
     uint(Width, Length),
     { length(Bytes, Length)
     },
     sequence(byte, Bytes).
 msgpack_bin(Width, Bytes) -->
     { is_list(Bytes),
-      bin_width_byte(Width, Byte),
+      bin_width_format(Width, Format),
       length(Bytes, Length)
     },
-    [Byte],
+    [Format],
     uint(Width, Length),
     sequence(byte, Bytes).
 
-bin_width_byte( 8, 0xc4).
-bin_width_byte(16, 0xc5).
-bin_width_byte(32, 0xc6).
+bin_width_format( 8, 0xc4).
+bin_width_format(16, 0xc5).
+bin_width_format(32, 0xc6).
 
 %!  msgpack_bin(?Bytes)// is semidet.
 %
