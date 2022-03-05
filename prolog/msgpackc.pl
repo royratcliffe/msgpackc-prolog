@@ -305,9 +305,9 @@ fixstr_format(Format) :-
 msgpack_str(Width, String) -->
     { var(String),
       !,
-      str_width_byte(Width, Byte)
+      str_width_format(Width, Format)
     },
-    [Byte],
+    [Format],
     uint(Width, Length),
     { length(Bytes, Length)
     },
@@ -317,18 +317,18 @@ msgpack_str(Width, String) -->
     }.
 msgpack_str(Width, String) -->
     { string(String),
-      str_width_byte(Width, Byte),
+      str_width_format(Width, Format),
       string_codes(String, Codes),
       phrase(utf8_codes(Codes), Bytes),
       length(Bytes, Length)
     },
-    [Byte],
+    [Format],
     uint(Width, Length),
     sequence(byte, Bytes).
 
-str_width_byte( 8, 0xd9).
-str_width_byte(16, 0xda).
-str_width_byte(32, 0xdb).
+str_width_format( 8, 0xd9).
+str_width_format(16, 0xda).
+str_width_format(32, 0xdb).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
