@@ -75,7 +75,8 @@ msgpack(bool(false)) --> msgpack_false, !.
 msgpack(bool(true)) --> msgpack_true, !.
 msgpack(int(Int)) --> msgpack_int(Int), !.
 msgpack(str(Str)) --> msgpack_str(Str), !.
-msgpack(array(Array)) --> msgpack_array(msgpack, Array).
+msgpack(array(Array)) --> msgpack_array(msgpack, Array), !.
+msgpack(map(Map)) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map).
 
 %!  msgpack_object(?Object)// is semidet.
 %
@@ -554,6 +555,72 @@ msgpack_array(OnElement, Width, Array) -->
 
 array_width_format(16, 0xdc).
 array_width_format(32, 0xdd).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    map format family
+
+    +--------+~~~~~~~~~~~~~~~~~+
+    |1000XXXX|   X*2 objects   | fixmap
+    +--------+~~~~~~~~~~~~~~~~~+
+
+    +--------+--------+--------+~~~~~~~~~~~~~~~~~+
+    |  0xde  |YYYYYYYY|YYYYYYYY|   Y*2 objects   | map 16
+    +--------+--------+--------+~~~~~~~~~~~~~~~~~+
+
+    +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
+    |  0xdf  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|   Z*2 objects   | 32
+    +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+msgpack_map(OnPair, Map) --> msgpack_fixmap(OnPair, Map), !.
+msgpack_map(OnPair, Map) --> msgpack_map(OnPair, _, Map), !.
+
+msgpack_fixmap(OnPair, Map) -->
+    { var(Map),
+      !
+    },
+    [Format],
+    { fixmap_format_length(Format, Length),
+      length(Map, Length)
+    },
+    sequence(OnPair, Map).
+msgpack_fixmap(OnPair, Map) -->
+    { length(Map, Length),
+      fixmap_format_length(Format, Length)
+    },
+    [Format],
+    sequence(OnPair, Map).
+
+fixmap_format_length(Format, Length) :-
+    fix_format_length(shift(0b1000, 4), Format, Length).
+
+msgpack_map(OnPair, Width, Map) -->
+    { var(Map),
+      !,
+      map_width_format(Width, Format)
+    },
+    [Format],
+    uint(Width, Length),
+    { length(Map, Length)
+    },
+    sequence(OnPair, Map).
+msgpack_map(OnPair, Width, Map) -->
+    { is_list(Map),
+      map_width_format(Width, Format),
+      length(Map, Length)
+    },
+    [Format],
+    uint(Width, Length),
+    sequence(OnPair, Map).
+
+map_width_format(16, 0xde).
+map_width_format(32, 0xdf).
+
+msgpack_pair(OnKey, OnValue, Key-Value) -->
+    call(OnKey, Key),
+    call(OnValue, Value).
 
 %!  fix_format_length(Fix, Format, Length) is semidet.
 %
