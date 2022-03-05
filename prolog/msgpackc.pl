@@ -251,6 +251,18 @@ msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
     |101XXXXX|  data  |
     +--------+========+
 
+    +--------+--------+--------+========+
+    |  0xd9  |YYYYYYYY|YYYYYYYY|  data  |
+    +--------+--------+--------+========+
+
+    +--------+--------+--------+--------+--------+========+
+    |  0xda  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|  data  |
+    +--------+--------+--------+--------+--------+========+
+
+    +--------+--------+--------+--------+--------+========+
+    |  0xdb  |AAAAAAAA|AAAAAAAA|AAAAAAAA|AAAAAAAA|  data  |
+    +--------+--------+--------+--------+--------+========+
+
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 %!  msgpack_fixstr(?String)// is semidet.
