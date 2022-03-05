@@ -33,7 +33,8 @@
 :- use_foreign_library(foreign(msgpackc)).
 
 :- meta_predicate
-    msgpack_array(3, ?, ?, ?).
+    msgpack_array(3, ?, ?, ?),
+    msgpack_map(3, ?, ?, ?).
 
 /** <module> C-Based Message Pack for SWI-Prolog
 
