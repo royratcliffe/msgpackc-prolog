@@ -3,8 +3,11 @@
 
 test(msgpack, true(A == [0b1001 0001, 123])) :-
     phrase(msgpackc:msgpack(array([int(123)])), A).
-test(msgpack, true(A == [0b1001 0001, 123])) :-
-    phrase(msgpackc:msgpack(array([array([int(1)])])), A).
+test(msgpack, true(A == [0b1001 0001, 0b1001 0001, 123])) :-
+    phrase(msgpackc:msgpack(array([array([int(123)])])), A).
+test(msgpack, true(B == map([int(1)-str("x")]))) :-
+    phrase(msgpack(map([int(1)-str("x")])), A),
+    phrase(msgpack(B), A).
 
 test(msgpack_object_nil, [true(A == [0xc0])]) :-
     phrase(msgpack_object(nil), A).
