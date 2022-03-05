@@ -56,6 +56,8 @@ test(int, all(A-B == [ 8-[0xff],
                      ])) :-
     phrase(msgpackc:int(A, -1), B).
 
+test(uint8, fail) :- phrase(msgpackc:uint8(256), _).
+
 test(msgpack_fixstr, true(A == "")) :-
     phrase(msgpack_fixstr(A), [0b101 00000]).
 test(msgpack_fixstr, true(A == "hello")) :-
@@ -67,8 +69,19 @@ test(msgpack_fixstr, true(B == [163, 229, 165, 189])) :-
     string_codes(A, [22909]), phrase(msgpack_fixstr(A), B).
 
 test(msgpack_str8, true(B == [217, 3, 229, 165, 189])) :-
-    string_codes(A, [22909]), phrase(msgpack_str8(A), B).
+    string_codes(A, [22909]), phrase(msgpack_str(8, A), B).
 test(msgpack_str8, true(B == [22909])) :-
-    phrase(msgpack_str8(A), [217, 3, 229, 165, 189]), string_codes(A, B).
+    phrase(msgpack_str(8, A), [217, 3, 229, 165, 189]), string_codes(A, B).
+
+%   In the test example below, notice the non-deterministic rendering of
+%   a string. Also notice that only the width of the length varies, from
+%   one to two to four *big-endian* bytes.
+
+test(msgpack_str,
+     all(A-B == [  8-[217,          5, 104, 101, 108, 108, 111],
+                  16-[218,       0, 5, 104, 101, 108, 108, 111],
+                  32-[219, 0, 0, 0, 5, 104, 101, 108, 108, 111]
+                ])) :-
+    phrase(msgpackc:msgpack_str(A, "hello"), B).
 
 :- end_tests(msgpackc).

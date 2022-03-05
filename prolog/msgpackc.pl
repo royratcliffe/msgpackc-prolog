@@ -10,7 +10,7 @@
             msgpack_float//2,                   % ?Width,?Float
             msgpack_float//1,                   % ?Float
             msgpack_fixstr//1,                  % ?String
-            msgpack_str8//1                     % ?String
+            msgpack_str//2                      % ?Width,?String
           ]).
 :- autoload(library(dcg/high_order), [sequence//2]).
 
@@ -191,8 +191,18 @@ msgpack_bin(Bytes) -->
 %   grammar accounts for signed integers between -128 through 127
 %   inclusive.
 %
-%   @tbd An argument exists for translating byte//1 and all the 8-bit
-%   grammar components to C for performance reasons.
+%   Importantly, phrases such as the following example fail. There _is
+%   no_ byte sequence that represents an unsigned integer in 8 bits.
+%   Other sub-grammars for Message Pack depend on this type of
+%   last-stage back-tracking while exploring the realm of possible
+%   matches.
+%
+%       phrase(msgpackc:uint8(256), _)
+%
+%   @tbd A reasable argument exists for translating byte//1 and all the
+%   8-bit grammar components to C for performance reasons; either that
+%   or in its stead some performance benchmarking work that demonstrates
+%   negligable difference.
 
 byte(Byte) -->
     [Byte],
@@ -233,8 +243,17 @@ int8(Integer) -->
 
 msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
 
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    str format family
+
+    +--------+========+
+    |101XXXXX|  data  |
+    +--------+========+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 %!  msgpack_fixstr(?String)// is semidet.
-%!  msgpack_str8(?String)// is semidet.
 %
 %   Unifies Message Pack byte codes with fixed String of length between
 %   0 and 31 inclusive.
@@ -265,24 +284,38 @@ msgpack_fixstr(String) -->
     byte(Byte),
     sequence(byte, Bytes).
 
-msgpack_str8(String) -->
-    { var(String)
+%!  msgpack_str(?Width, ?String)// is semidet.
+%
+%   Refactors common string-byte unification utilises by all string
+%   grammars for the Message Pack protocol's 8, 16 and 32 bit lengths.
+%   Unifies for Length number of bytes for String. Length is *not* the
+%   length of String in Unicodes but the number of bytes in its UTF-8
+%   representation.
+
+msgpack_str(Width, String) -->
+    { var(String),
+      !,
+      str_width_byte(Width, Byte)
     },
-    !,
-    [0xd9],
-    uint8(Length),
+    [Byte],
+    uint(Width, Length),
     { length(Bytes, Length)
     },
     sequence(byte, Bytes),
     { phrase(utf8_codes(Codes), Bytes),
       string_codes(String, Codes)
     }.
-msgpack_str8(String) -->
+msgpack_str(Width, String) -->
     { string(String),
+      str_width_byte(Width, Byte),
       string_codes(String, Codes),
       phrase(utf8_codes(Codes), Bytes),
       length(Bytes, Length)
     },
-    [0xd9],
-    uint8(Length),
+    [Byte],
+    uint(Width, Length),
     sequence(byte, Bytes).
+
+str_width_byte( 8, 0xd9).
+str_width_byte(16, 0xda).
+str_width_byte(32, 0xdb).
