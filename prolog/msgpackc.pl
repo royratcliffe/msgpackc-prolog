@@ -9,6 +9,7 @@
             msgpack_objects//1,                 % ?Objects
             msgpack_float//2,                   % ?Width,?Float
             msgpack_float//1,                   % ?Float
+            msgpack_str//1,                     % ?String
             msgpack_fixstr//1,                  % ?String
             msgpack_str//2,                     % ?Width,?String
             msgpack_bin//2,                     % ?Width,?Bytes
