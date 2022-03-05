@@ -76,8 +76,10 @@ msgpack(bool(false)) --> msgpack_false, !.
 msgpack(bool(true)) --> msgpack_true, !.
 msgpack(int(Int)) --> msgpack_int(Int), !.
 msgpack(str(Str)) --> msgpack_str(Str), !.
+msgpack(bin(Bin)) --> msgpack_bin(Bin), !.
 msgpack(array(Array)) --> msgpack_array(msgpack, Array), !.
-msgpack(map(Map)) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map).
+msgpack(map(Map)) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map), !.
+msgpack(ext(Type, Ext)) --> msgpack_ext(Type, Ext).
 
 %!  msgpack_object(?Object)// is semidet.
 %
@@ -622,6 +624,68 @@ map_width_format(32, 0xdf).
 msgpack_pair(OnKey, OnValue, Key-Value) -->
     call(OnKey, Key),
     call(OnValue, Value).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    ext format family
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+msgpack_ext(Type, Bytes) --> msgpack_fixext(Type, Bytes), !.
+msgpack_ext(Type, Bytes) --> msgpack_ext(_, Type, Bytes), !.
+
+msgpack_fixext(Type, Bytes) -->
+    { var(Type),
+      var(Bytes),
+      !,
+      fixext_length_format(Length, Format)
+    },
+    [Format],
+    int8(Type),
+    { length(Bytes, Length)
+    },
+    sequence(byte, Bytes).
+msgpack_fixext(Type, Bytes) -->
+    { integer(Type),
+      is_list(Bytes),
+      fixext_length_format(Length, Format),
+      length(Bytes, Length)
+    },
+    [Format],
+    int8(Type),
+    sequence(byte, Bytes).
+
+fixext_length_format( 1, 0xd4).
+fixext_length_format( 2, 0xd5).
+fixext_length_format( 4, 0xd6).
+fixext_length_format( 8, 0xd7).
+fixext_length_format(16, 0xd8).
+
+msgpack_ext(Width, Type, Bytes) -->
+    { var(Bytes),
+      !,
+      ext_width_format(Width, Format)
+    },
+    [Format],
+    uint(Width, Length),
+    int8(Type),
+    { length(Bytes, Length)
+    },
+    sequence(byte, Bytes).
+msgpack_ext(Width, Type, Bytes) -->
+    { integer(Type),
+      is_list(Bytes),
+      ext_width_format(Width, Format),
+      length(Bytes, Length)
+    },
+    [Format],
+    uint(Width, Length),
+    int8(Type),
+    sequence(byte, Bytes).
+
+ext_width_format( 8, 0xc7).
+ext_width_format(16, 0xc8).
+ext_width_format(32, 0xc9).
 
 %!  fix_format_length(Fix, Format, Length) is semidet.
 %
