@@ -78,7 +78,15 @@ msgpack_object(Float) -->
     },
     !.
 msgpack_object(String) --> msgpack_str(_, String), !.
+msgpack_object(Array) --> msgpack_array(msgpack_object, _, Array), !.
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+You cannot use a MemoryFile as a ground term because no way of
+determining whether or not the incoming term is a memory file without
+attempting to open it.
+
 msgpack_object(MemoryFile) --> msgpack_memory_file(MemoryFile).
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 %!  msgpack_float(?Width, ?Float)// is nondet.
 %!  msgpack_float(?Float)// is semidet.
