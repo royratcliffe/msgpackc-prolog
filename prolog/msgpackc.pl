@@ -62,70 +62,6 @@ improvements might aggregate to milliseconds.
 
 :- multifile type_ext_hook/3.
 
-%!  type_ext_hook(Type:integer, Ext:list, Term) is semidet.
-%
-%   Parses the extension byte block.
-%
-%   The timestamp extension encodes seconds and nanoseconds since 1970,
-%   also called Unix epoch time. Three alternative encodings exist: 4
-%   bytes, 8 bytes and 12 bytes.
-
-type_ext_hook(-1, Ext, timestamp(Epoch)) :-
-    once(phrase(timestamp(Epoch), Ext)).
-
-timestamp(Epoch) -->
-    { var(Epoch)
-    },
-    int32(Epoch).
-timestamp(Epoch) -->
-    { var(Epoch)
-    },
-    uint64(UInt64),
-    { NanoSeconds is UInt64 >> 34,
-      NanoSeconds < 1 000 000 000,
-      Seconds is UInt64 /\ ((1 << 34) - 1),
-      tv(Epoch, Seconds, NanoSeconds)
-    }.
-timestamp(Epoch) -->
-    { var(Epoch)
-    },
-    int32(NanoSeconds),
-    int64(Seconds),
-    { tv(Epoch, Seconds, NanoSeconds)
-    }.
-timestamp(Epoch) -->
-    { number(Epoch),
-      tv(Epoch, Seconds, 0)
-    },
-    int32(Seconds).
-timestamp(Epoch) -->
-    { number(Epoch),
-      Epoch >= 0,
-      tv(Epoch, Seconds, NanoSeconds),
-      Seconds < (1 << 34),
-      UInt64 is (NanoSeconds << 34) \/ Seconds
-    },
-    uint64(UInt64).
-timestamp(Epoch) -->
-    { number(Epoch),
-      tv(Epoch, Seconds, NanoSeconds)
-    },
-    int32(NanoSeconds),
-    int64(Seconds).
-
-%!  tv(Epoch, Sec, NSec) is det.
-%
-%   Uses floor/1 when computing NSec. Time only counts completed
-%   nanoseconds and time runs up. Asking for the integer part of a float
-%   does *not* give an integer.
-
-tv(Epoch, Sec, NSec), var(Epoch) =>
-    abs(NSec) < 1 000 000 000,
-    Epoch is Sec + (NSec / 1e9).
-tv(Epoch, Sec, NSec), number(Epoch) =>
-    Sec is floor(float_integer_part(Epoch)),
-    NSec is floor(1e9 * float_fractional_part(Epoch)).
-
 %!  msgpack(?Object:compound)// is nondet.
 %
 %   Where Object is a compound arity-1 functor, never a list term. The
@@ -756,6 +692,70 @@ msgpack_ext(Width, Type, Ext) -->
 ext_width_format( 8, 0xc7).
 ext_width_format(16, 0xc8).
 ext_width_format(32, 0xc9).
+
+%!  type_ext_hook(Type:integer, Ext:list, Term) is semidet.
+%
+%   Parses the extension byte block.
+%
+%   The timestamp extension encodes seconds and nanoseconds since 1970,
+%   also called Unix epoch time. Three alternative encodings exist: 4
+%   bytes, 8 bytes and 12 bytes.
+
+type_ext_hook(-1, Ext, timestamp(Epoch)) :-
+    once(phrase(timestamp(Epoch), Ext)).
+
+timestamp(Epoch) -->
+    { var(Epoch)
+    },
+    int32(Epoch).
+timestamp(Epoch) -->
+    { var(Epoch)
+    },
+    uint64(UInt64),
+    { NanoSeconds is UInt64 >> 34,
+      NanoSeconds < 1 000 000 000,
+      Seconds is UInt64 /\ ((1 << 34) - 1),
+      tv(Epoch, Seconds, NanoSeconds)
+    }.
+timestamp(Epoch) -->
+    { var(Epoch)
+    },
+    int32(NanoSeconds),
+    int64(Seconds),
+    { tv(Epoch, Seconds, NanoSeconds)
+    }.
+timestamp(Epoch) -->
+    { number(Epoch),
+      tv(Epoch, Seconds, 0)
+    },
+    int32(Seconds).
+timestamp(Epoch) -->
+    { number(Epoch),
+      Epoch >= 0,
+      tv(Epoch, Seconds, NanoSeconds),
+      Seconds < (1 << 34),
+      UInt64 is (NanoSeconds << 34) \/ Seconds
+    },
+    uint64(UInt64).
+timestamp(Epoch) -->
+    { number(Epoch),
+      tv(Epoch, Seconds, NanoSeconds)
+    },
+    int32(NanoSeconds),
+    int64(Seconds).
+
+%!  tv(Epoch, Sec, NSec) is det.
+%
+%   Uses floor/1 when computing NSec. Time only counts completed
+%   nanoseconds and time runs up. Asking for the integer part of a float
+%   does *not* give an integer.
+
+tv(Epoch, Sec, NSec), var(Epoch) =>
+    abs(NSec) < 1 000 000 000,
+    Epoch is Sec + (NSec / 1e9).
+tv(Epoch, Sec, NSec), number(Epoch) =>
+    Sec is floor(float_integer_part(Epoch)),
+    NSec is floor(1e9 * float_fractional_part(Epoch)).
 
 %!  fix_format_length(Fix, Format, Length) is semidet.
 %
