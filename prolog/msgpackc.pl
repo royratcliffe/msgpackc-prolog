@@ -272,6 +272,13 @@ msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+%!  msgpack_str(?String)// is semidet.
+%
+%   Unifies String with the shortest packed UTF-8 string message.
+
+msgpack_str(String) --> msgpack_fixstr(String), !.
+msgpack_str(String) --> msgpack_str(_, String), !.
+
 %!  msgpack_fixstr(?String)// is semidet.
 %
 %   Unifies Message Pack byte codes with fixed String of length between
