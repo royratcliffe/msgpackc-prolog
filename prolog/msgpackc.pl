@@ -10,7 +10,8 @@
             msgpack_float//2,                   % ?Width,?Float
             msgpack_float//1,                   % ?Float
             msgpack_fixstr//1,                  % ?String
-            msgpack_str//2                      % ?Width,?String
+            msgpack_str//2,                     % ?Width,?String
+            msgpack_bin//2                      % ?Width,?Bytes
           ]).
 :- autoload(library(dcg/high_order), [sequence//2]).
 
@@ -159,23 +160,6 @@ fixint8(Integer) -->
     int8(Integer),
     { Integer >= -32
     }.
-
-msgpack_bin(Bytes) -->
-    { var(Bytes)
-    },
-    !,
-    [0xc4],
-    byte(Length),
-    { length(Bytes, Length)
-    },
-    sequence(byte, Bytes).
-msgpack_bin(Bytes) -->
-    { is_list(Bytes),
-      length(Bytes, Length)
-    },
-    [0xc4],
-    byte(Length),
-    sequence(byte, Bytes).
 
 %!  byte(?Byte)// is semidet.
 %!  uint8(?Integer)// is semidet.
@@ -331,3 +315,49 @@ msgpack_str(Width, String) -->
 str_width_byte( 8, 0xd9).
 str_width_byte(16, 0xda).
 str_width_byte(32, 0xdb).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    bin format family
+
+    +--------+--------+========+
+    |  0xc4  |XXXXXXXX|  data  |
+    +--------+--------+========+
+
+    +--------+--------+--------+========+
+    |  0xc5  |YYYYYYYY|YYYYYYYY|  data  |
+    +--------+--------+--------+========+
+
+    +--------+--------+--------+--------+--------+========+
+    |  0xc6  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|  data  |
+    +--------+--------+--------+--------+--------+========+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+%!  msgpack_bin(?Width, ?Bytes:list)// is nondet.
+%
+%   Works very much like the string grammar except that the Bytes remain
+%   as 8-bit byte lists.
+
+msgpack_bin(Width, Bytes) -->
+    { var(Bytes),
+      !,
+      bin_width_byte(Width, Byte)
+    },
+    [Byte],
+    uint(Width, Length),
+    { length(Bytes, Length)
+    },
+    sequence(byte, Bytes).
+msgpack_bin(Width, Bytes) -->
+    { is_list(Bytes),
+      bin_width_byte(Width, Byte),
+      length(Bytes, Length)
+    },
+    [Byte],
+    uint(Width, Length),
+    sequence(byte, Bytes).
+
+bin_width_byte( 8, 0xc4).
+bin_width_byte(16, 0xc5).
+bin_width_byte(32, 0xc6).
