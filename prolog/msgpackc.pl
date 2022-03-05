@@ -413,3 +413,97 @@ msgpack_memory_file(MemoryFile) -->
     { memory_file_bytes(MemoryFile, Bytes)
     },
     msgpack_bin(Bytes).
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    array format family
+
+    +--------+~~~~~~~~~~~~~~~~~+
+    |1001XXXX|    X objects    | fixarray
+    +--------+~~~~~~~~~~~~~~~~~+
+
+    +--------+--------+--------+~~~~~~~~~~~~~~~~~+
+    |  0xdc  |YYYYYYYY|YYYYYYYY|    Y objects    | array 16
+    +--------+--------+--------+~~~~~~~~~~~~~~~~~+
+
+    +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
+    |  0xdd  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|    Z objects    | 32
+    +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+msgpack_array(OnElement, Array) --> msgpack_fixarray(OnElement, Array), !.
+msgpack_array(OnElement, Array) --> msgpack_array(OnElement, _, Array), !.
+
+%!  msgpack_fixarray(:OnElement, Array)// is semidet.
+%!  msgpack_array(:OnElement, ?Width, ?Array)// is nondet.
+%
+%   Non-deterministically unify with Array of Message Pack objects, zero
+%   or more msgpack_object(Object) phrases.
+%
+%   Does not prescribe how to extract the elements. OnElement defines
+%   the sequence's element.
+
+msgpack_fixarray(OnElement, Array) -->
+    { var(Array),
+      !
+    },
+    byte(Format),
+    { fixarray_format_length(Format, Length),
+      length(Array, Length)
+    },
+    sequence(OnElement, Array).
+msgpack_fixarray(OnElement, Array) -->
+    { length(Array, Length),
+      fixarray_format_length(Format, Length)
+    },
+    [Format],
+    sequence(OnElement, Array).
+
+fixarray_format_length(Format, Length) :-
+    fix_format_length(shift(0b1001, 4), Format, Length).
+
+msgpack_array(OnElement, Width, Array) -->
+    { var(Array),
+      !,
+      array_width_format(Width, Format)
+    },
+    [Format],
+    uint(Width, Length),
+    { length(Array, Length)
+    },
+    sequence(OnElement, Array).
+msgpack_array(OnElement, Width, Array) -->
+    { is_list(Array),
+      array_width_format(Width, Format),
+      length(Array, Length)
+    },
+    [Format],
+    uint(Width, Length),
+    sequence(OnElement, Array).
+
+array_width_format(16, 0xdc).
+array_width_format(32, 0xdd).
+
+%!  fix_format_length(Fix, Format, Length) is semidet.
+%
+%   Useful tool for unifying a Format and Length using a Fix where Fix
+%   typically matches a Min-Max pair. The Fix can also have the
+%   shift(Bits, Left) form where the amount of Left shift implies the
+%   minimum and maximum range.
+
+fix_format_length(Fix, Format, Length), var(Format) =>
+    fix_min_max(Fix, Min, Max),
+    Format is Min + Length,
+    Format >= Min,
+    Format =< Max.
+fix_format_length(Fix, Format, Length) =>
+    fix_min_max(Fix, Min, Max),
+    Format >= Min,
+    Format =< Max,
+    Length is Format - Min.
+
+fix_min_max(Min-Max, Min, Max) => true.
+fix_min_max(shift(Bits, Left), Min, Max) =>
+    Min is Bits << Left,
+    Max is Min \/ ((1 << Left) - 1).
