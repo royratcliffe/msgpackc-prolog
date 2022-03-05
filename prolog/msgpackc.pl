@@ -683,6 +683,12 @@ msgpack_pair(OnKey, OnValue, Key-Value) -->
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+%!  msgpack_ext(?Term)// is semidet.
+%
+%   In (++) mode, meaning fully ground with no variables, the ++Term
+%   first unifies Term with its Type and Ext bytes using
+%   msgpack:type_ext_hook/3 multi-file predicate.
+
 msgpack_ext(Term) -->
     { ground(Term),
       !,
