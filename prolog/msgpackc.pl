@@ -617,29 +617,29 @@ msgpack_pair(OnKey, OnValue, Key-Value) -->
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-msgpack_ext(Type, Bytes) --> msgpack_fixext(Type, Bytes), !.
-msgpack_ext(Type, Bytes) --> msgpack_ext(_, Type, Bytes), !.
+msgpack_ext(Type, Ext) --> msgpack_fixext(Type, Ext), !.
+msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext), !.
 
-msgpack_fixext(Type, Bytes) -->
+msgpack_fixext(Type, Ext) -->
     { var(Type),
-      var(Bytes),
+      var(Ext),
       !,
       fixext_length_format(Length, Format)
     },
     [Format],
     int8(Type),
-    { length(Bytes, Length)
+    { length(Ext, Length)
     },
-    sequence(byte, Bytes).
-msgpack_fixext(Type, Bytes) -->
+    sequence(byte, Ext).
+msgpack_fixext(Type, Ext) -->
     { integer(Type),
-      is_list(Bytes),
+      is_list(Ext),
       fixext_length_format(Length, Format),
-      length(Bytes, Length)
+      length(Ext, Length)
     },
     [Format],
     int8(Type),
-    sequence(byte, Bytes).
+    sequence(byte, Ext).
 
 fixext_length_format( 1, 0xd4).
 fixext_length_format( 2, 0xd5).
@@ -647,27 +647,27 @@ fixext_length_format( 4, 0xd6).
 fixext_length_format( 8, 0xd7).
 fixext_length_format(16, 0xd8).
 
-msgpack_ext(Width, Type, Bytes) -->
-    { var(Bytes),
+msgpack_ext(Width, Type, Ext) -->
+    { var(Ext),
       !,
       ext_width_format(Width, Format)
     },
     [Format],
     uint(Width, Length),
     int8(Type),
-    { length(Bytes, Length)
+    { length(Ext, Length)
     },
-    sequence(byte, Bytes).
-msgpack_ext(Width, Type, Bytes) -->
+    sequence(byte, Ext).
+msgpack_ext(Width, Type, Ext) -->
     { integer(Type),
-      is_list(Bytes),
+      is_list(Ext),
       ext_width_format(Width, Format),
-      length(Bytes, Length)
+      length(Ext, Length)
     },
     [Format],
     uint(Width, Length),
     int8(Type),
-    sequence(byte, Bytes).
+    sequence(byte, Ext).
 
 ext_width_format( 8, 0xc7).
 ext_width_format(16, 0xc8).
