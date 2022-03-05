@@ -258,10 +258,8 @@ msgpack_fixstr(String) -->
     { var(String),
       !
     },
-    byte(Byte),
-    { Byte >= 0b101 00000,
-      Byte =< 0b101 11111,
-      Length is Byte - 0b101 00000,
+    byte(Format),
+    { fixstr_format_length(Format, Length),
       length(Bytes, Length)
     },
     sequence(byte, Bytes),
@@ -273,12 +271,21 @@ msgpack_fixstr(String) -->
       string_codes(String, Codes),
       phrase(utf8_codes(Codes), Bytes),
       length(Bytes, Length),
-      Byte is 0b101 00000 + Length,
-      Byte >= 0b101 00000,
-      Byte =< 0b101 11111
+      fixstr_format_length(Format, Length)
     },
-    byte(Byte),
+    byte(Format),
     sequence(byte, Bytes).
+
+fixstr_format_length(Format, Length), var(Format) =>
+    Format is 0b101 00000 + Length,
+    fixstr_format(Format).
+fixstr_format_length(Format, Length) =>
+    fixstr_format(Format),
+    Length is Format - 0b101 00000.
+
+fixstr_format(Format) :-
+    Format >= 0b101 00000,
+    Format =< 0b101 11111.
 
 %!  msgpack_str(?Width, ?String)// is semidet.
 %
