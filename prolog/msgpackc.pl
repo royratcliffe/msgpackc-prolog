@@ -171,9 +171,9 @@ msgpack(Term) --> msgpack_ext(Term).
 %   bits of width. The ordering of the Message Pack specification
 %   arranges the types in order to exploit this feature.
 
-msgpack_object(nil) --> [0xc0], !.
-msgpack_object(false) --> [0xc2], !.
-msgpack_object(true) --> [0xc3], !.
+msgpack_object(nil) --> msgpack_nil, !.
+msgpack_object(false) --> msgpack_false, !.
+msgpack_object(true) --> msgpack_true, !.
 msgpack_object(Integer) -->
     msgpack_int(Integer),
     { integer(Integer)
