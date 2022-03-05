@@ -286,7 +286,7 @@ msgpack_fixstr(String) -->
 
 %!  msgpack_str(?Width, ?String)// is semidet.
 %
-%   Refactors common string-byte unification utilises by all string
+%   Refactors common string-byte unification utilised by all string
 %   grammars for the Message Pack protocol's 8, 16 and 32 bit lengths.
 %   Unifies for Length number of bytes for String. Length is *not* the
 %   length of String in Unicodes but the number of bytes in its UTF-8
