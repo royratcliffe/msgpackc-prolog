@@ -255,19 +255,19 @@ msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
     str format family
 
     +--------+========+
-    |101XXXXX|  data  |
+    |101XXXXX|  data  | fixstr
     +--------+========+
 
     +--------+--------+========+
-    |  0xd9  |YYYYYYYY|  data  |
+    |  0xd9  |YYYYYYYY|  data  | str 8
     +--------+--------+========+
 
     +--------+--------+--------+========+
-    |  0xda  |ZZZZZZZZ|ZZZZZZZZ|  data  |
+    |  0xda  |ZZZZZZZZ|ZZZZZZZZ|  data  | str 16
     +--------+--------+--------+========+
 
     +--------+--------+--------+--------+--------+========+
-    |  0xdb  |AAAAAAAA|AAAAAAAA|AAAAAAAA|AAAAAAAA|  data  |
+    |  0xdb  |AAAAAAAA|AAAAAAAA|AAAAAAAA|AAAAAAAA|  data  | str 32
     +--------+--------+--------+--------+--------+========+
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
