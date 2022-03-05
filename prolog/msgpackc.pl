@@ -18,9 +18,9 @@
             msgpack_float//1,                   % ?Float
 
             % str format family
-            msgpack_str//1,                     % ?String
-            msgpack_fixstr//1,                  % ?String
-            msgpack_str//2,                     % ?Width,?String
+            msgpack_str//1,                     % ?Str
+            msgpack_fixstr//1,                  % ?Str
+            msgpack_str//2,                     % ?Width,?Str
 
             msgpack_bin//2,                     % ?Width,?Bytes
             msgpack_bin//1                      % ?Bytes
@@ -120,7 +120,7 @@ msgpack_object(Float) -->
     { float(Float)
     },
     !.
-msgpack_object(String) --> msgpack_str(_, String), !.
+msgpack_object(Str) --> msgpack_str(_, Str), !.
 msgpack_object(Array) --> msgpack_array(msgpack_object, _, Array), !.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -339,20 +339,20 @@ msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-%!  msgpack_str(?String)// is semidet.
+%!  msgpack_str(?Str)// is semidet.
 %
-%   Unifies String with the shortest packed UTF-8 string message.
+%   Unifies Str with the shortest packed UTF-8 string message.
 
-msgpack_str(String) --> msgpack_fixstr(String), !.
-msgpack_str(String) --> msgpack_str(_, String), !.
+msgpack_str(Str) --> msgpack_fixstr(Str), !.
+msgpack_str(Str) --> msgpack_str(_, Str), !.
 
-%!  msgpack_fixstr(?String)// is semidet.
+%!  msgpack_fixstr(?Str)// is semidet.
 %
-%   Unifies Message Pack byte codes with fixed String of length between
+%   Unifies Message Pack byte codes with fixed Str of length between
 %   0 and 31 inclusive.
 
-msgpack_fixstr(String) -->
-    { var(String),
+msgpack_fixstr(Str) -->
+    { var(Str),
       !
     },
     byte(Format),
@@ -361,11 +361,11 @@ msgpack_fixstr(String) -->
     },
     sequence(byte, Bytes),
     { phrase(utf8_codes(Codes), Bytes),
-      string_codes(String, Codes)
+      string_codes(Str, Codes)
     }.
-msgpack_fixstr(String) -->
-    { string(String),
-      string_codes(String, Codes),
+msgpack_fixstr(Str) -->
+    { string(Str),
+      string_codes(Str, Codes),
       phrase(utf8_codes(Codes), Bytes),
       length(Bytes, Length),
       fixstr_format_length(Format, Length)
@@ -384,16 +384,16 @@ fixstr_format(Format) :-
     Format >= 0b101 00000,
     Format =< 0b101 11111.
 
-%!  msgpack_str(?Width, ?String)// is semidet.
+%!  msgpack_str(?Width, ?Str)// is semidet.
 %
 %   Refactors common string-byte unification utilised by all string
 %   grammars for the Message Pack protocol's 8, 16 and 32 bit lengths.
-%   Unifies for Length number of bytes for String. Length is *not* the
-%   length of String in Unicodes but the number of bytes in its UTF-8
+%   Unifies for Length number of bytes for Str. Length is *not* the
+%   length of Str in Unicodes but the number of bytes in its UTF-8
 %   representation.
 
-msgpack_str(Width, String) -->
-    { var(String),
+msgpack_str(Width, Str) -->
+    { var(Str),
       !,
       str_width_format(Width, Format)
     },
@@ -403,12 +403,12 @@ msgpack_str(Width, String) -->
     },
     sequence(byte, Bytes),
     { phrase(utf8_codes(Codes), Bytes),
-      string_codes(String, Codes)
+      string_codes(Str, Codes)
     }.
-msgpack_str(Width, String) -->
-    { string(String),
+msgpack_str(Width, Str) -->
+    { string(Str),
       str_width_format(Width, Format),
-      string_codes(String, Codes),
+      string_codes(Str, Codes),
       phrase(utf8_codes(Codes), Bytes),
       length(Bytes, Length)
     },
