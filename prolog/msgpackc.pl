@@ -110,9 +110,9 @@ msgpack(Term) --> msgpack_ext(Term).
 msgpack_object(nil) --> msgpack_nil, !.
 msgpack_object(false) --> msgpack_false, !.
 msgpack_object(true) --> msgpack_true, !.
-msgpack_object(Integer) -->
-    msgpack_int(Integer),
-    { integer(Integer)
+msgpack_object(Int) -->
+    msgpack_int(Int),
+    { integer(Int)
     },
     !.
 msgpack_object(Float) -->
@@ -179,7 +179,7 @@ msgpack_float(Float) --> [0xca], float32(Float).
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
-%!  msgpack_int(?Integer:integer)// is semidet.
+%!  msgpack_int(?Int:integer)// is semidet.
 %
 %   Finds the optimum integer representation, shortest first. Tries
 %   fixed integer at first which works for a small subset of integers
@@ -189,32 +189,32 @@ msgpack_float(Float) --> [0xca], float32(Float).
 %   assumes that the difference does not matter. An overlap exists
 %   between signed and unsigned integers.
 
-msgpack_int(Integer) --> msgpack_fixint(_, Integer), !.
-msgpack_int(Integer) -->
-    { integer(Integer),
-      Integer < 0,
+msgpack_int(Int) --> msgpack_fixint(_, Int), !.
+msgpack_int(Int) -->
+    { integer(Int),
+      Int < 0,
       !
     },
-    msgpack_int(_, Integer).
-msgpack_int(Integer) --> msgpack_uint(_, Integer), !.
-msgpack_int(Integer) --> msgpack_int(_, Integer).
+    msgpack_int(_, Int).
+msgpack_int(Int) --> msgpack_uint(_, Int), !.
+msgpack_int(Int) --> msgpack_int(_, Int).
 
-%!  msgpack_uint(?Width, ?Integer)// is nondet.
-%!  msgpack_int(?Width, ?Integer)// is nondet.
+%!  msgpack_uint(?Width, ?Int)// is nondet.
+%!  msgpack_int(?Width, ?Int)// is nondet.
 
-msgpack_uint(8, Integer) --> [0xcc], byte(Integer).
-msgpack_uint(16, Integer) --> [0xcd], uint16(Integer).
-msgpack_uint(32, Integer) --> [0xce], uint32(Integer).
-msgpack_uint(64, Integer) --> [0xcf], uint64(Integer).
+msgpack_uint( 8, Int) --> [0xcc], byte(Int).
+msgpack_uint(16, Int) --> [0xcd], uint16(Int).
+msgpack_uint(32, Int) --> [0xce], uint32(Int).
+msgpack_uint(64, Int) --> [0xcf], uint64(Int).
 
-msgpack_int(8, Integer) --> [0xd0], int8(Integer).
-msgpack_int(16, Integer) --> [0xd1], int16(Integer).
-msgpack_int(32, Integer) --> [0xd2], int32(Integer).
-msgpack_int(64, Integer) --> [0xd3], int64(Integer).
+msgpack_int( 8, Int) --> [0xd0], int8(Int).
+msgpack_int(16, Int) --> [0xd1], int16(Int).
+msgpack_int(32, Int) --> [0xd2], int32(Int).
+msgpack_int(64, Int) --> [0xd3], int64(Int).
 
 %!  float(?Width, ?Float)// is nondet.
-%!  uint(?Width, ?Integer)// is nondet.
-%!  int(?Width, ?Integer)// is nondet.
+%!  uint(?Width, ?Int)// is nondet.
+%!  int(?Width, ?Int)// is nondet.
 %
 %   Wraps the underlying C big- and little-endian support functions for
 %   unifying bytes with floats and integers.
@@ -222,38 +222,38 @@ msgpack_int(64, Integer) --> [0xd3], int64(Integer).
 float(32, Float) --> float32(Float).
 float(64, Float) --> float64(Float).
 
-uint(8, Integer) --> uint8(Integer).
-uint(16, Integer) --> uint16(Integer).
-uint(32, Integer) --> uint32(Integer).
-uint(64, Integer) --> uint64(Integer).
+uint( 8, Int) --> uint8(Int).
+uint(16, Int) --> uint16(Int).
+uint(32, Int) --> uint32(Int).
+uint(64, Int) --> uint64(Int).
 
-int(8, Integer) --> int8(Integer).
-int(16, Integer) --> int16(Integer).
-int(32, Integer) --> int32(Integer).
-int(64, Integer) --> int64(Integer).
+int( 8, Int) --> int8(Int).
+int(16, Int) --> int16(Int).
+int(32, Int) --> int32(Int).
+int(64, Int) --> int64(Int).
 
-%!  msgpack_fixint(?Width, ?Integer)// is semidet.
+%!  msgpack_fixint(?Width, ?Int)// is semidet.
 %
 %   Width is the integer bit width, only 8 and never 16, 32 or 64.
 
-msgpack_fixint(8, Integer) --> fixint8(Integer).
+msgpack_fixint(8, Int) --> fixint8(Int).
 
-%!  fixint8(Integer)// is semidet.
+%!  fixint8(Int)// is semidet.
 %
 %   Very similar to int8//1 except for adding an additional constraint:
-%   the Integer must not fall below -32. All other constraints also
+%   the Int must not fall below -32. All other constraints also
 %   apply for signed 8-bit integers. Rather than falling between -128
 %   and 127 however, the _fixed_ 8-bit integer does not overlap the bit
 %   patterns reserved for other Message Pack type codes.
 
-fixint8(Integer) -->
-    int8(Integer),
-    { Integer >= -32
+fixint8(Int) -->
+    int8(Int),
+    { Int >= -32
     }.
 
 %!  byte(?Byte)// is semidet.
-%!  uint8(?Integer)// is semidet.
-%!  int8(?Integer)// is semidet.
+%!  uint8(?Int)// is semidet.
+%!  int8(?Int)// is semidet.
 %
 %   Simplifies the Message Pack grammar by asserting Byte constraints.
 %   Every Byte is an integer in-between 0 and 255 inclusive; fails
@@ -285,29 +285,29 @@ byte(Byte) -->
       Byte =< 0xff
     }.
 
-uint8(Integer) --> byte(Integer).
+uint8(Int) --> byte(Int).
 
-int8(Integer) -->
-    byte(Integer),
-    { Integer =< 0x7f
+int8(Int) -->
+    byte(Int),
+    { Int =< 0x7f
     },
     !.
-int8(Integer) -->
-    { var(Integer)
+int8(Int) -->
+    { var(Int)
     },
     byte(Byte),
     { Byte >= 0x80,
-      Integer is Byte - 0x100
+      Int is Byte - 0x100
     },
     !.
-int8(Integer) -->
-    { integer(Integer),
-      % Now that Integer is non-variable and an integer, just reverse
-      % the Integer from Byte solution above: swap the sides, add 256 to
+int8(Int) -->
+    { integer(Int),
+      % Now that Int is non-variable and an integer, just reverse
+      % the Int from Byte solution above: swap the sides, add 256 to
       % both sides and swap the compute and threshold comparison; at
-      % this point Integer must be negative. Grammar at byte//1 will
-      % catch Integer values greater than -1.
-      Byte is 0x100 + Integer
+      % this point Int must be negative. Grammar at byte//1 will
+      % catch Int values greater than -1.
+      Byte is 0x100 + Int
     },
     byte(Byte).
 
