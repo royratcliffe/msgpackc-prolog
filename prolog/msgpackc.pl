@@ -112,8 +112,24 @@ msgpack_float(Float) -->
     [0xcb|Bytes].
 msgpack_float(Float) --> [0xca], float32(Float).
 
-msgpack_integer(Integer) --> msgpack_fixint(_, Integer).
-msgpack_integer(Integer) --> msgpack_uint(_, Integer).
+%!  msgpack_integer(?Integer:integer)// is semidet.
+%
+%   Finds the optimum integer representation, shortest first. Tries
+%   fixed integer at first which works for a small subset of integers
+%   between -32 and 127. If that fails because the integer falls outside
+%   that small range, the second attempt applies unsigned
+%   representation; it only applies signed formats for negatives. This
+%   assumes that the difference does not matter. An overlap exists
+%   between signed and unsigned integers.
+
+msgpack_integer(Integer) --> msgpack_fixint(_, Integer), !.
+msgpack_integer(Integer) -->
+    { integer(Integer),
+      Integer < 0,
+      !
+    },
+    msgpack_int(_, Integer).
+msgpack_integer(Integer) --> msgpack_uint(_, Integer), !.
 msgpack_integer(Integer) --> msgpack_int(_, Integer).
 
 %!  msgpack_uint(?Width, ?Integer)// is nondet.
