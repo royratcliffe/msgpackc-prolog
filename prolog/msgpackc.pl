@@ -39,6 +39,18 @@ improvements might aggregate to milliseconds.
 @author Roy Ratcliffe
 */
 
+%!  msgpack(?Object:compound)// is nondet.
+%
+%   Where Object is a compound arity-1 functor, never a list term. The
+%   functor carries the format choice.
+%
+%   Packing arrays and maps necessarily recurses. Array elements are
+%   themselves objects; arrays are objects hence arrays of arrays
+%   nested up to any number of dimensions. Same goes for maps.
+
+msgpack(int(Int)) --> msgpack_integer(Int), !.
+msgpack(array(Array)) --> msgpack_array(msgpack, Array).
+
 %!  msgpack_object(?Object)// is semidet.
 %
 %   Encodes and decodes a single Message Pack object. Term encodes an
