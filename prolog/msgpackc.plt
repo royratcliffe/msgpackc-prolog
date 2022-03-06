@@ -107,4 +107,14 @@ test(msgpack_bin, true(A == [1, 2, 3])) :-
 test(timestamp, true(A == [214, 255, 0, 0, 0, 0])) :-
     phrase(sequence(msgpack, [timestamp(0)]), A).
 
+endian(Endian) :- term_hash(aap, Hash), endian(Hash, Endian).
+
+endian(9270206, little).
+endian(16674642, big).
+
+test(le, [ condition(endian(little)),
+           true(A == [65, 66, 67, 68, 69, 70, 71, 72])
+         ]) :-
+    phrase(msgpackc:float64(2.39373654120722785592079162598e6), A).
+
 :- end_tests(msgpackc).
