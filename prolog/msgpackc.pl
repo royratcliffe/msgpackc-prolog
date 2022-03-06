@@ -109,6 +109,9 @@ msgpack(Term) --> msgpack_ext(Term).
 %   least-significant two bits, 00 through 11, select eight through 64
 %   bits of width. The ordering of the Message Pack specification
 %   arranges the types in order to exploit this feature.
+%
+%   Prolog has no native type for raw binary objects in the vein of R's
+%   raw vector.
 
 msgpack_object(nil) --> msgpack_nil, !.
 msgpack_object(false) --> msgpack_false, !.
