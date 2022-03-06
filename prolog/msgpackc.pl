@@ -5,7 +5,7 @@
 */
 
 :- module(msgpackc,
-          [ msgpack//1,
+          [ msgpack//1,                         % ?Term
 
             msgpack_object//1,                  % ?Object
             msgpack_objects//1,                 % ?Objects
@@ -14,16 +14,34 @@
             msgpack_false//0,
             msgpack_true//0,
 
-            msgpack_float//2,                   % ?Width,?Float
+            % float format family
             msgpack_float//1,                   % ?Float
+            msgpack_float//2,                   % ?Width,?Float
+
+            % int format family
+            msgpack_int//1,                     % ?Int
+            msgpack_fixint//2,                  % ?Width,?Int
+            msgpack_uint//2,                    % ?Width,?Int
+            msgpack_int//2,                     % ?Width,?Int
 
             % str format family
             msgpack_str//1,                     % ?Str
             msgpack_fixstr//1,                  % ?Str
             msgpack_str//2,                     % ?Width,?Str
 
+            % bin format family
+            msgpack_bin//1,                     % ?Bytes
             msgpack_bin//2,                     % ?Width,?Bytes
-            msgpack_bin//1                      % ?Bytes
+
+            % array format family
+            msgpack_array//2,                   % :OnElement,?Array
+
+            % map format family
+            msgpack_map//2,                     % :OnPair,?Map
+
+            % ext format family
+            msgpack_ext//1,                     % ?Term
+            msgpack_ext//2                      % ?Type,?Ext
           ]).
 :- autoload(library(dcg/high_order), [sequence//2, sequence/4]).
 :- autoload(library(utf8), [utf8_codes/3]).
@@ -148,6 +166,12 @@ msgpack_object(MemoryFile) --> msgpack_memory_file(MemoryFile).
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+%!  msgpack_objects(?Objects)// is semidet.
+%
+%   Zero or more Message Pack objects.
+
+msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
+
 %!  msgpack_nil// is semidet.
 %!  msgpack_false// is semidet.
 %!  msgpack_true// is semidet.
@@ -160,8 +184,22 @@ msgpack_false --> [0xc2].
 
 msgpack_true --> [0xc3].
 
-%!  msgpack_float(?Width, ?Float)// is nondet.
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    float format family
+
+    +--------+--------+--------+--------+--------+
+    |  0xca  |XXXXXXXX|XXXXXXXX|XXXXXXXX|XXXXXXXX| float 32
+    +--------+--------+--------+--------+--------+
+
+    +--------+--------+--------+-------- / --------+--------+--------+
+    |  0xcb  |YYYYYYYY|YYYYYYYY|YYYYYYYY / YYYYYYYY|YYYYYYYY|YYYYYYYY| float 64
+    +--------+--------+--------+-------- / --------+--------+--------+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 %!  msgpack_float(?Float)// is semidet.
+%!  msgpack_float(?Width, ?Float)// is nondet.
 %
 %   Delivers two alternative solutions by design, both valid. Uses the
 %   different renderings to select the best compromise between 32- and
@@ -181,18 +219,60 @@ msgpack_true --> [0xc3].
 %   floats as well as floating-point values. This provides an
 %   alternative representation for many integers.
 
+msgpack_float(Float) -->
+  { float64(Float, Bytes, []),
+    Bytes \= [_, _, _, _, 0, 0, 0, 0]
+  },
+  !,
+  [0xcb|Bytes].
+msgpack_float(Float) --> [0xca], float32(Float).
+
 msgpack_float(32, Float) --> [0xca], float32(Float).
 msgpack_float(64, Float) --> [0xcb], float64(Float).
 
-msgpack_float(Float) -->
-    { float64(Float, Bytes, []),
-      Bytes \= [_, _, _, _, 0, 0, 0, 0]
-    },
-    !,
-    [0xcb|Bytes].
-msgpack_float(Float) --> [0xca], float32(Float).
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    int format family
+
+    +--------+
+    |0XXXXXXX| fixint, 0 to 127
+    +--------+
+
+    +--------+
+    |111XXXXX| fixint, -32 to -1
+    +--------+
+
+    +--------+--------+
+    |  0xcc  |ZZZZZZZZ| uint 8
+    +--------+--------+
+
+    +--------+--------+--------+
+    |  0xcd  |ZZZZZZZZ|ZZZZZZZZ| uint 16
+    +--------+--------+--------+
+
+    +--------+--------+--------+--------+--------+
+    |  0xce  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ| uint 32
+    +--------+--------+--------+--------+--------+
+
+    +--------+--------+--------+-------- / --------+--------+--------+
+    |  0xcf  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ / ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ| uint 64
+    +--------+--------+--------+-------- / --------+--------+--------+
+
+    +--------+--------+
+    |  0xd0  |ZZZZZZZZ| int 8
+    +--------+--------+
+
+    +--------+--------+--------+
+    |  0xd1  |ZZZZZZZZ|ZZZZZZZZ| int 16
+    +--------+--------+--------+
+
+    +--------+--------+--------+--------+--------+
+    |  0xd2  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ| int 32
+    +--------+--------+--------+--------+--------+
+
+    +--------+--------+--------+-------- / --------+--------+--------+
+    |  0xd3  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ / ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ| int 64
+    +--------+--------+--------+-------- / --------+--------+--------+
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -216,39 +296,6 @@ msgpack_int(Int) -->
 msgpack_int(Int) --> msgpack_uint(_, Int), !.
 msgpack_int(Int) --> msgpack_int(_, Int).
 
-%!  msgpack_uint(?Width, ?Int)// is nondet.
-%!  msgpack_int(?Width, ?Int)// is nondet.
-
-msgpack_uint( 8, Int) --> [0xcc],  uint8(Int).
-msgpack_uint(16, Int) --> [0xcd], uint16(Int).
-msgpack_uint(32, Int) --> [0xce], uint32(Int).
-msgpack_uint(64, Int) --> [0xcf], uint64(Int).
-
-msgpack_int( 8, Int) --> [0xd0],  int8(Int).
-msgpack_int(16, Int) --> [0xd1], int16(Int).
-msgpack_int(32, Int) --> [0xd2], int32(Int).
-msgpack_int(64, Int) --> [0xd3], int64(Int).
-
-%!  float(?Width, ?Float)// is nondet.
-%!  uint(?Width, ?Int)// is nondet.
-%!  int(?Width, ?Int)// is nondet.
-%
-%   Wraps the underlying C big- and little-endian support functions for
-%   unifying bytes with floats and integers.
-
-float(32, Float) --> float32(Float).
-float(64, Float) --> float64(Float).
-
-uint( 8, Int) -->  uint8(Int).
-uint(16, Int) --> uint16(Int).
-uint(32, Int) --> uint32(Int).
-uint(64, Int) --> uint64(Int).
-
-int( 8, Int) -->  int8(Int).
-int(16, Int) --> int16(Int).
-int(32, Int) --> int32(Int).
-int(64, Int) --> int64(Int).
-
 %!  msgpack_fixint(?Width, ?Int)// is semidet.
 %
 %   Width is the integer bit width, only 8 and never 16, 32 or 64.
@@ -268,71 +315,18 @@ fixint8(Int) -->
     { Int >= -32
     }.
 
-%!  byte(?Byte)// is semidet.
-%!  uint8(?Int)// is semidet.
-%!  int8(?Int)// is semidet.
-%
-%   Simplifies the Message Pack grammar by asserting Byte constraints.
-%   Every Byte is an integer in-between 0 and 255 inclusive; fails
-%   semi-deterministically otherwise. Other high-level grammer
-%   components can presume these contraints as a baseline and assert any
-%   addition limits appropriately.
-%
-%   Predicate uint8//1 is just a synonym for byte//1. The int8//1
-%   grammar accounts for signed integers between -128 through 127
-%   inclusive.
-%
-%   Importantly, phrases such as the following example fail. There _is
-%   no_ byte sequence that represents an unsigned integer in 8 bits.
-%   Other sub-grammars for Message Pack depend on this type of
-%   last-stage back-tracking while exploring the realm of possible
-%   matches.
-%
-%       phrase(msgpackc:uint8(256), _)
-%
-%   @tbd A reasable argument exists for translating byte//1 and all the
-%   8-bit grammar components to C for performance reasons; either that
-%   or in its stead some performance benchmarking work that demonstrates
-%   negligable difference.
+%!  msgpack_uint(?Width, ?Int)// is nondet.
+%!  msgpack_int(?Width, ?Int)// is nondet.
 
-byte(Byte) -->
-    [Byte],
-    { integer(Byte),
-      Byte >= 0x00,
-      Byte =< 0xff
-    }.
+msgpack_uint( 8, Int) --> [0xcc],  uint8(Int).
+msgpack_uint(16, Int) --> [0xcd], uint16(Int).
+msgpack_uint(32, Int) --> [0xce], uint32(Int).
+msgpack_uint(64, Int) --> [0xcf], uint64(Int).
 
-uint8(Int) --> byte(Int).
-
-int8(Int) -->
-    byte(Int),
-    { Int =< 0x7f
-    },
-    !.
-int8(Int) -->
-    { var(Int)
-    },
-    byte(Byte),
-    { Byte >= 0x80,
-      Int is Byte - 0x100
-    },
-    !.
-int8(Int) -->
-    { integer(Int),
-      % Now that Int is non-variable and an integer, just reverse
-      % the Int from Byte solution above: swap the sides, add 256 to
-      % both sides and swap the compute and threshold comparison; at
-      % this point Int must be negative. Grammar at byte//1 will
-      % catch Int values greater than -1.
-      Byte is 0x100 + Int
-    },
-    byte(Byte).
-
-%!  msgpack_objects(?Objects)// is semidet.
-%
-%   Zero or more Message Pack objects.
-
-msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
+msgpack_int( 8, Int) --> [0xd0],  int8(Int).
+msgpack_int(16, Int) --> [0xd1], int16(Int).
+msgpack_int(32, Int) --> [0xd2], int32(Int).
+msgpack_int(64, Int) --> [0xd3], int64(Int).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -442,18 +436,40 @@ str_width_format(32, 0xdb).
     bin format family
 
     +--------+--------+========+
-    |  0xc4  |XXXXXXXX|  data  |
+    |  0xc4  |XXXXXXXX|  data  | bin 8
     +--------+--------+========+
 
     +--------+--------+--------+========+
-    |  0xc5  |YYYYYYYY|YYYYYYYY|  data  |
+    |  0xc5  |YYYYYYYY|YYYYYYYY|  data  | bin 16
     +--------+--------+--------+========+
 
     +--------+--------+--------+--------+--------+========+
-    |  0xc6  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|  data  |
+    |  0xc6  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|  data  | bin 32
     +--------+--------+--------+--------+--------+========+
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+%!  msgpack_bin(?Bytes)// is semidet.
+%
+%   Succeeds only once when Bytes unifies with the Message Pack byte
+%   stream for the first time. Relies on the width ordering: low to
+%   high and attempts 8 bits first, 16 bits next and finally 32. Fails
+%   if 32 bits is not enough to unify the number of bytes because the
+%   byte-list has more than four thousand megabytes.
+
+msgpack_bin(Bytes) --> msgpack_bin(_, Bytes), !.
+
+msgpack_memory_file(MemoryFile) -->
+    { var(MemoryFile),
+      !
+    },
+    msgpack_bin(Bytes),
+    { memory_file_bytes(MemoryFile, Bytes)
+    }.
+msgpack_memory_file(MemoryFile) -->
+    { memory_file_bytes(MemoryFile, Bytes)
+    },
+    msgpack_bin(Bytes).
 
 %!  msgpack_bin(?Width, ?Bytes:list)// is nondet.
 %
@@ -483,28 +499,6 @@ bin_width_format( 8, 0xc4).
 bin_width_format(16, 0xc5).
 bin_width_format(32, 0xc6).
 
-%!  msgpack_bin(?Bytes)// is semidet.
-%
-%   Succeeds only once when Bytes unifies with the Message Pack byte
-%   stream for the first time. Relies on the width ordering: low to
-%   high and attempts 8 bits first, 16 bits next and finally 32. Fails
-%   if 32 bits is not enough to unify the number of bytes because the
-%   byte-list has more than four thousand megabytes.
-
-msgpack_bin(Bytes) --> msgpack_bin(_, Bytes), !.
-
-msgpack_memory_file(MemoryFile) -->
-    { var(MemoryFile),
-      !
-    },
-    msgpack_bin(Bytes),
-    { memory_file_bytes(MemoryFile, Bytes)
-    }.
-msgpack_memory_file(MemoryFile) -->
-    { memory_file_bytes(MemoryFile, Bytes)
-    },
-    msgpack_bin(Bytes).
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     array format family
@@ -518,10 +512,15 @@ msgpack_memory_file(MemoryFile) -->
     +--------+--------+--------+~~~~~~~~~~~~~~~~~+
 
     +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
-    |  0xdd  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|    Z objects    | 32
+    |  0xdd  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|    Z objects    | array 32
     +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+%!  msgpack_array(:OnElement, ?Array:list)// is semidet.
+%
+%   Unify with Array using OnElement as the per-element grammar
+%   predicate.
 
 msgpack_array(OnElement, Array) --> msgpack_fixarray(OnElement, Array), !.
 msgpack_array(OnElement, Array) --> msgpack_array(OnElement, _, Array), !.
@@ -590,10 +589,14 @@ array_width_format(32, 0xdd).
     +--------+--------+--------+~~~~~~~~~~~~~~~~~+
 
     +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
-    |  0xdf  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|   Z*2 objects   | 32
+    |  0xdf  |ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|ZZZZZZZZ|   Z*2 objects   | map 32
     +--------+--------+--------+--------+--------+~~~~~~~~~~~~~~~~~+
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+%!  msgpack_map(:OnPair, ?Map:list)// is semidet.
+%
+%   Unify with Map using OnPair as the pair-wise grammar.
 
 msgpack_map(OnPair, Map) --> msgpack_fixmap(OnPair, Map), !.
 msgpack_map(OnPair, Map) --> msgpack_map(OnPair, _, Map), !.
@@ -679,6 +682,10 @@ msgpack_ext(Term) -->
     !,
     { type_ext_hook(Type, Ext, Term)
     }.
+
+%!  msgpack_ext(?Type, ?Ext)// is semidet.
+%
+%   Type is a signed integer. Ext is a list of byte codes
 
 msgpack_ext(Type, Ext) --> msgpack_fixext(Type, Ext), !.
 msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext), !.
@@ -822,3 +829,83 @@ fix_min_max(Min-Max, Min, Max) => true.
 fix_min_max(shift(Bits, Left), Min, Max) =>
     Min is Bits << Left,
     Max is Min \/ ((1 << Left) - 1).
+
+%!  float(?Width, ?Float)// is nondet.
+%!  uint(?Width, ?Int)// is nondet.
+%!  int(?Width, ?Int)// is nondet.
+%
+%   Wraps the underlying C big- and little-endian support functions for
+%   unifying bytes with floats and integers.
+
+float(32, Float) --> float32(Float).
+float(64, Float) --> float64(Float).
+
+uint( 8, Int) -->  uint8(Int).
+uint(16, Int) --> uint16(Int).
+uint(32, Int) --> uint32(Int).
+uint(64, Int) --> uint64(Int).
+
+int( 8, Int) -->  int8(Int).
+int(16, Int) --> int16(Int).
+int(32, Int) --> int32(Int).
+int(64, Int) --> int64(Int).
+
+%!  byte(?Byte)// is semidet.
+%!  uint8(?Int)// is semidet.
+%!  int8(?Int)// is semidet.
+%
+%   Simplifies the Message Pack grammar by asserting Byte constraints.
+%   Every Byte is an integer in-between 0 and 255 inclusive; fails
+%   semi-deterministically otherwise. Other high-level grammer
+%   components can presume these contraints as a baseline and assert any
+%   addition limits appropriately.
+%
+%   Predicate uint8//1 is just a synonym for byte//1. The int8//1
+%   grammar accounts for signed integers between -128 through 127
+%   inclusive.
+%
+%   Importantly, phrases such as the following example fail. There _is
+%   no_ byte sequence that represents an unsigned integer in 8 bits.
+%   Other sub-grammars for Message Pack depend on this type of
+%   last-stage back-tracking while exploring the realm of possible
+%   matches.
+%
+%       phrase(msgpackc:uint8(256), _)
+%
+%   @tbd A reasable argument exists for translating byte//1 and all the
+%   8-bit grammar components to C for performance reasons; either that
+%   or in its stead some performance benchmarking work that demonstrates
+%   negligable difference.
+
+byte(Byte) -->
+    [Byte],
+    { integer(Byte),
+      Byte >= 0x00,
+      Byte =< 0xff
+    }.
+
+uint8(Int) --> byte(Int).
+
+int8(Int) -->
+    byte(Int),
+    { Int =< 0x7f
+    },
+    !.
+int8(Int) -->
+    { var(Int)
+    },
+    byte(Byte),
+    { Byte >= 0x80,
+      Int is Byte - 0x100
+    },
+    !.
+int8(Int) -->
+    { integer(Int),
+      % Now that Int is non-variable and an integer, just reverse
+      % the Int from Byte solution above: swap the sides, add 256 to
+      % both sides and swap the compute and threshold comparison; at
+      % this point Int must be negative. Grammar at byte//1 will
+      % catch Int values greater than -1.
+      Byte is 0x100 + Int
+    },
+    byte(Byte).
