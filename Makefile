@@ -1,7 +1,7 @@
 SOBJ = $(PACKSODIR)/msgpackc.$(SOEXT)
-OBJ = c/msgpackc.o c/objectc.o c/unpack.o c/version.o c/vrefbuffer.o c/zone.o
+OBJ = c/msgpackc.o
 
-CFLAGS += -Ih -O2 -fomit-frame-pointer
+CFLAGS += -O2 -fomit-frame-pointer
 
 all: $(SOBJ)
 
