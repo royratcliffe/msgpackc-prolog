@@ -9,6 +9,9 @@ test(msgpack, true(B == map([int(1)-str("x")]))) :-
     phrase(msgpack(map([int(1)-str("x")])), A),
     phrase(msgpack(B), A).
 
+test(msgpack, true(B == map([str("a")-int(1)]))) :-
+    phrase(msgpack_object(_{a:1}), A), phrase(msgpack(B), A).
+
 test(msgpack_object, true(A == [0x80])) :-
     phrase(msgpack_object(_{}), A).
 test(msgpack_object, true(A == B{})) :-
