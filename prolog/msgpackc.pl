@@ -58,7 +58,8 @@ improvements might aggregate to milliseconds.
 
 :- meta_predicate
     msgpack_array(3, ?, ?, ?),
-    msgpack_map(3, ?, ?, ?).
+    msgpack_map(3, ?, ?, ?),
+    msgpack_dict(3, ?, ?, ?).
 
 :- multifile type_ext_hook/3.
 
@@ -613,6 +614,18 @@ map_width_format(32, 0xdf).
 msgpack_pair(OnKey, OnValue, Key-Value) -->
     call(OnKey, Key),
     call(OnValue, Value).
+
+msgpack_dict(OnPair, Dict) -->
+    { var(Dict),
+      !
+    },
+    msgpack_map(OnPair, Pairs),
+    { dict_create(Dict, _, Pairs)
+    }.
+msgpack_dict(OnPair, Dict) -->
+    { dict_pairs(Dict, _, Pairs)
+    },
+    msgpack_map(OnPair, Pairs).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
