@@ -123,8 +123,16 @@ msgpack_object(Float) -->
     { float(Float)
     },
     !.
-msgpack_object(Str) --> msgpack_str(_, Str), !.
-msgpack_object(Array) --> msgpack_array(msgpack_object, _, Array), !.
+msgpack_object(Str) --> msgpack_str(Str), !.
+msgpack_object(bin(MemoryFile)) --> msgpack_memory_file(MemoryFile), !.
+msgpack_object(Array) --> msgpack_array(msgpack_object, Array), !.
+msgpack_object(Map) -->
+    msgpack_dict(msgpack_pair(msgpack_key, msgpack_object), Map),
+    !.
+msgpack_object(ext(Ext)) --> msgpack_ext(Ext).
+
+msgpack_key(Key) --> msgpack_int(Key), !.
+msgpack_key(Key) --> msgpack_str(Key).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 You cannot use a MemoryFile as a ground term because no way of
