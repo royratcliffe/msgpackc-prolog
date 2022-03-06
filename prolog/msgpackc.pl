@@ -137,13 +137,15 @@ msgpack_object(ext(Ext)) --> msgpack_ext(Ext).
 msgpack_key(Key) --> msgpack_int(Key), !.
 msgpack_key(Key) --> msgpack_str(Key).
 
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-You cannot use a MemoryFile as a ground term because no way of
-determining whether or not the incoming term is a memory file without
-attempting to open it.
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    You cannot use a MemoryFile as a ground term because no way of
+    determining whether or not the incoming term is a memory file
+    exists without attempting to open it.
 
 msgpack_object(MemoryFile) --> msgpack_memory_file(MemoryFile).
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 %!  msgpack_nil// is semidet.
 %!  msgpack_false// is semidet.
