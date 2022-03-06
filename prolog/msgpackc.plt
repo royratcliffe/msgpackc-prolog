@@ -12,6 +12,9 @@ test(msgpack, true(B == map([int(1)-str("x")]))) :-
 test(msgpack, true(B == map([str("a")-int(1)]))) :-
     phrase(msgpack_object(_{a:1}), A), phrase(msgpack(B), A).
 
+test(sequence_msgpack, true(A == [192, 192, 192])) :-
+    phrase(sequence(msgpack, [nil, nil, nil]), A).
+
 test(msgpack_object, true(A == [0x80])) :-
     phrase(msgpack_object(_{}), A).
 test(msgpack_object, true(A == B{})) :-
@@ -100,5 +103,8 @@ test(msgpack_bin, true(A == [])) :-
     phrase(msgpack_bin(8, A), [0xc4, 0]).
 test(msgpack_bin, true(A == [1, 2, 3])) :-
     phrase(msgpack_bin(8, A), [0xc4, 3, 1, 2, 3]).
+
+test(timestamp, true(A == [214, 255, 0, 0, 0, 0])) :-
+    phrase(sequence(msgpack, [timestamp(0)]), A).
 
 :- end_tests(msgpackc).
