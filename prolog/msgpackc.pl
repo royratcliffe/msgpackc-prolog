@@ -175,8 +175,30 @@ msgpack_object(Map) -->
     !.
 msgpack_object(ext(Ext)) --> msgpack_ext(Ext).
 
+%!  msgpack_key(?Key:atomic)// is semidet.
+%
+%   SWI Prolog dictionaries require atomic keys. Message packing allows
+%   _any_ key types including arrays, sub-map, binaries and extensions.
+%   Map keys are only integer or atom under Prolog. Fail therefore for
+%   any other types; use msgpack//1 to accept non-atomic maps with keys
+%   of any kind.
+%
+%   @arg Key integer or atom used as map pair key.
+
 msgpack_key(Key) --> msgpack_int(Key), !.
-msgpack_key(Key) --> msgpack_str(Key).
+msgpack_key(Key) -->
+    { var(Key),
+      !
+    },
+    msgpack_str(Str),
+    { atom_string(Key, Str)
+    },
+    !.
+msgpack_key(Key) -->
+    { atom(Key),
+      atom_string(Key, Str)
+    },
+    msgpack_str(Str).
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
