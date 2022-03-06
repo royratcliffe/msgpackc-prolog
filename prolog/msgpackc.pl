@@ -216,12 +216,12 @@ msgpack_int(Int) --> msgpack_int(_, Int).
 %!  msgpack_uint(?Width, ?Int)// is nondet.
 %!  msgpack_int(?Width, ?Int)// is nondet.
 
-msgpack_uint( 8, Int) --> [0xcc], byte(Int).
+msgpack_uint( 8, Int) --> [0xcc],  uint8(Int).
 msgpack_uint(16, Int) --> [0xcd], uint16(Int).
 msgpack_uint(32, Int) --> [0xce], uint32(Int).
 msgpack_uint(64, Int) --> [0xcf], uint64(Int).
 
-msgpack_int( 8, Int) --> [0xd0], int8(Int).
+msgpack_int( 8, Int) --> [0xd0],  int8(Int).
 msgpack_int(16, Int) --> [0xd1], int16(Int).
 msgpack_int(32, Int) --> [0xd2], int32(Int).
 msgpack_int(64, Int) --> [0xd3], int64(Int).
@@ -236,12 +236,12 @@ msgpack_int(64, Int) --> [0xd3], int64(Int).
 float(32, Float) --> float32(Float).
 float(64, Float) --> float64(Float).
 
-uint( 8, Int) --> uint8(Int).
+uint( 8, Int) -->  uint8(Int).
 uint(16, Int) --> uint16(Int).
 uint(32, Int) --> uint32(Int).
 uint(64, Int) --> uint64(Int).
 
-int( 8, Int) --> int8(Int).
+int( 8, Int) -->  int8(Int).
 int(16, Int) --> int16(Int).
 int(32, Int) --> int32(Int).
 int(64, Int) --> int64(Int).
