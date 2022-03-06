@@ -50,3 +50,7 @@ terms.
 
 The fundamental layer via `msgpack_object//1` attempts to match messages to
 fundamental types.
+
+## Useful links
+
+* [MessagePack specification](https://github.com/msgpack/msgpack/blob/master/spec.md)
