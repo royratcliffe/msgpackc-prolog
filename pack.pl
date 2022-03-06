@@ -1,5 +1,5 @@
 name(msgpackc).
-version('0.1.0').
+version('0.1.1').
 title('C-Based Message Pack for SWI-Prolog').
 author('Roy Ratcliffe', 'royratcliffe@me.com').
 packager('Roy Ratcliffe', 'royratcliffe@me.com').
