@@ -531,7 +531,8 @@ msgpack_fixarray(OnElement, Array) -->
     },
     sequence(OnElement, Array).
 msgpack_fixarray(OnElement, Array) -->
-    { length(Array, Length),
+    { is_list(Array),
+      length(Array, Length),
       fixarray_format_length(Format, Length)
     },
     [Format],
