@@ -578,7 +578,8 @@ msgpack_fixmap(OnPair, Map) -->
     },
     sequence(OnPair, Map).
 msgpack_fixmap(OnPair, Map) -->
-    { length(Map, Length),
+    { is_list(Map),
+      length(Map, Length),
       fixmap_format_length(Format, Length)
     },
     [Format],
