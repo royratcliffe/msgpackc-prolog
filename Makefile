@@ -1,7 +1,7 @@
 SOBJ = $(PACKSODIR)/msgpackc.$(SOEXT)
 OBJ = c/msgpackc.o
 
-CFLAGS += -Ih -O2 -fomit-frame-pointer
+CFLAGS += -O2 -fomit-frame-pointer
 
 all: $(SOBJ)
 
