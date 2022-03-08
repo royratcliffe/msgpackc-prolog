@@ -253,7 +253,7 @@ msgpack_true --> [0xc3].
 %   double representation is redundant because the 32-bit representation
 %   fully meets the resolution requirements of the float value.
 %
-%   The arity-1 version of the predicate duplicates the encoding
+%   The arity-1 (+) mode version of the predicate duplicates the encoding
 %   assumptions. The structure aims to implement precision width
 %   selection but _without_ re-rendering. It first unifies a 64-bit
 %   float with eight bytes. Parsing from bytes to Float will fail if
@@ -269,7 +269,7 @@ msgpack_float(Float) -->
   },
   !,
   [0xcb|Bytes].
-msgpack_float(Float) --> [0xca], float32(Float).
+msgpack_float(Float) --> msgpack_float(_, Float), !.
 
 msgpack_float(32, Float) --> [0xca], float32(Float).
 msgpack_float(64, Float) --> [0xcb], float64(Float).

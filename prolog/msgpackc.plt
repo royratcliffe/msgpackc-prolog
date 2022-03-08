@@ -10,6 +10,8 @@ test(msgpack, true(A == [0b1001 0001, 0b1001 0001, 123])) :-
 test(msgpack, true(B == map([int(1)-str("x")]))) :-
     phrase(msgpack(map([int(1)-str("x")])), A),
     phrase(msgpack(B), A).
+test(msgpack, true(Float == 1.0e+18)) :-
+    phrase(msgpack(float(Float)), [203, 67, 171, 193, 109, 103, 78, 200, 0]).
 
 test(msgpack, true(B == map([str("a")-int(1)]))) :-
     phrase(msgpack_object(_{a:1}), A), phrase(msgpack(B), A).
