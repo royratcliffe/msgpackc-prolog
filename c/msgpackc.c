@@ -50,16 +50,18 @@ a note for the direct dependency.
  *
  * Fails if it sees integer byte values outside the acceptable range,
  * zero through 255 inclusive. Failure always updates the given byte
- * buffer with the value of the bytes successfully seen.
+ * buffer with the value of the bytes successfully seen. Automatically
+ * fails if negative because `PL_get_uint64()` fails for signed
+ * integers.
  */
 int
 get_list_bytes(term_t Bytes0, term_t Bytes, size_t count, uint8_t *bytes)
 { term_t Tail = PL_copy_term_ref(Bytes0);
   term_t Byte = PL_new_term_ref();
   while (count--)
-  { int value;
+  { uint64_t value;
     if (!PL_get_list(Tail, Byte, Tail) ||
-        !PL_get_integer(Byte, &value) || value < 0 || value > UINT8_MAX) PL_fail;
+        !PL_get_uint64(Byte, &value) || value > UINT8_MAX) PL_fail;
     *bytes++ = value;
   }
   return PL_unify(Bytes, Tail);
