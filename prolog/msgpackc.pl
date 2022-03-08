@@ -841,18 +841,23 @@ sec_nsec(Seconds, NanoSeconds) -->
     int32(NanoSeconds),
     int64(Seconds).
 
-%!  tv(Epoch, Sec, NSec) is det.
+%!  tv(?Epoch:number, ?Sec:number, ?NSec:number) is det.
 %
-%   Uses floor/1 when computing NSec. Time only counts completed
-%   nanoseconds and time runs up. Asking for the integer part of a float
-%   does *not* give an integer.
+%   Uses floor/1 when computing Sec and round/1 for NSec. Time only
+%   counts completed seconds and time runs up. Asking for the
+%   integer part of a float does *not* give an integer. It gives the
+%   float-point value that matches the integer.
+%
+%   The arguments have number type by design. The predicate supports
+%   negatives; Epoch of -1.1 for example gives -1 seconds, -100,000,000
+%   nanoseconds.
 
 tv(Epoch, Sec, NSec), var(Epoch) =>
     abs(NSec) < 1 000 000 000,
     Epoch is Sec + (NSec / 1e9).
 tv(Epoch, Sec, NSec), number(Epoch) =>
     Sec is floor(float_integer_part(Epoch)),
-    NSec is floor(1e9 * float_fractional_part(Epoch)).
+    NSec is round(1e9 * float_fractional_part(Epoch)).
 
 %!  fix_format_length(Fix, Format, Length) is semidet.
 %
