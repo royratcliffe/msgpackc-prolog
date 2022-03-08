@@ -1,5 +1,7 @@
 :- begin_tests(msgpackc).
 :- use_module(msgpackc).
+:- use_module(library(plunit)).
+:- use_module(library(dcg/high_order)).
 
 test(msgpack, true(A == [0b1001 0001, 123])) :-
     phrase(msgpackc:msgpack(array([int(123)])), A).
