@@ -153,6 +153,10 @@ msgpack(Term) --> msgpack_ext(Term).
 %
 %   Prolog has no native type for raw binary objects in the vein of R's
 %   raw vector.
+%
+%   Notice that integer comes before float. This is important because
+%   Prolog integers can render as floats and vice versa provided that
+%   the integer is signed; it fails if unsigned.
 
 msgpack_object(nil) --> msgpack_nil, !.
 msgpack_object(false) --> msgpack_false, !.
