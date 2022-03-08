@@ -4,6 +4,40 @@
 ![cov](https://shields.io/endpoint?url=https://gist.githubusercontent.com/royratcliffe/ccccef2ac1329551794f2a466ee61014/raw/cov.json)
 ![fail](https://shields.io/endpoint?url=https://gist.githubusercontent.com/royratcliffe/ccccef2ac1329551794f2a466ee61014/raw/fail.json)
 
+## Usage
+
+Install the Prolog pack in SWI-Prolog using:
+
+```prolog
+pack_install(msgpackc).
+```
+
+Pack messages via Definite-Clause Grammar `msgpack//1` using compound terms. Prolog grammars operate by "unifying" terms with codes, in this case only byte codes rather than Unicodes. Unification works in both directions and even with partial knowns. The grammar back-tracks through all possible solutions non-deterministically until it finds one, else fails.
+
+## Brief examples
+
+All the following succeed.
+
+```prolog
+?- [library(msgpackc)].
+true.
+
+?- phrase(msgpack(float(1e9)), Bytes).
+Bytes = [202, 78, 110, 107, 40].
+
+?- phrase(msgpack(float(1e18)), Bytes).
+Bytes = [203, 67, 171, 193, 109, 103, 78, 200, 0].
+
+?- phrase(msgpack(float(Float)), [203, 67, 171, 193, 109, 103, 78, 200, 0]).
+Float = 1.0e+18.
+
+?- phrase(msgpack(array([str("hello"), str("world")])), Bytes), phrase(msgpack(Term), Bytes).
+Bytes = [146, 165, 104, 101, 108, 108, 111, 165, 119|...],
+Term = array([str("hello"), str("world")]).
+```
+
+## Project goals
+
 Primarily implemented in Prolog but with core highly-optimised C support functions for handling endian transformations via machine-code byte swapping, re-interpreting between ordered bytes (octets) and IEEE-754 floating-point numbers and integers of different bit-widths.
 
 The goal of this delicate balance between Prolog and C, between
