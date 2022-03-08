@@ -805,40 +805,39 @@ type_ext_hook(-1, Ext, timestamp(Epoch)) :-
 timestamp(Epoch) -->
     { var(Epoch)
     },
-    int32(Epoch).
+    epoch(Epoch).
 timestamp(Epoch) -->
-    { var(Epoch)
+    { number(Epoch),
+      Epoch >= 0,
+      tv(Epoch, Seconds, NanoSeconds)
     },
+    sec_nsec(Seconds, NanoSeconds).
+
+epoch(Epoch) -->
+    int32(Epoch).
+epoch(Epoch) -->
     uint64(UInt64),
     { NanoSeconds is UInt64 >> 34,
       NanoSeconds < 1 000 000 000,
       Seconds is UInt64 /\ ((1 << 34) - 1),
       tv(Epoch, Seconds, NanoSeconds)
     }.
-timestamp(Epoch) -->
-    { var(Epoch)
-    },
+epoch(Epoch) -->
     int32(NanoSeconds),
     int64(Seconds),
     { tv(Epoch, Seconds, NanoSeconds)
     }.
-timestamp(Epoch) -->
-    { number(Epoch),
-      tv(Epoch, Seconds, 0)
+
+sec_nsec(Seconds, 0) -->
+    { Seconds < (1 << 32)
     },
     int32(Seconds).
-timestamp(Epoch) -->
-    { number(Epoch),
-      Epoch >= 0,
-      tv(Epoch, Seconds, NanoSeconds),
-      Seconds < (1 << 34),
+sec_nsec(Seconds, NanoSeconds) -->
+    { Seconds < (1 << 34),
       UInt64 is (NanoSeconds << 34) \/ Seconds
     },
     uint64(UInt64).
-timestamp(Epoch) -->
-    { number(Epoch),
-      tv(Epoch, Seconds, NanoSeconds)
-    },
+sec_nsec(Seconds, NanoSeconds) -->
     int32(NanoSeconds),
     int64(Seconds).
 
