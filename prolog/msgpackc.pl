@@ -257,11 +257,11 @@ msgpack_true --> [0xc3].
 %   double representation is redundant because the 32-bit representation
 %   fully meets the resolution requirements of the float value.
 %
-%   The arity-1 (+) mode version of the predicate duplicates the encoding
-%   assumptions. The structure aims to implement precision width
-%   selection but _without_ re-rendering. It first unifies a 64-bit
-%   float with eight bytes. Parsing from bytes to Float will fail if
-%   the bytes run out at the end of the byte stream.
+%   The arity-1 (+) mode version of the predicate duplicates the
+%   encoding assumptions. The structure aims to implement precision
+%   width selection but _without_ re-rendering. It first unifies a
+%   64-bit float with eight bytes. Parsing from bytes to Float will fail
+%   if the bytes run out at the end of the byte stream.
 %
 %   Predicates float32//1 and float64//1 unify with integer-valued
 %   floats as well as floating-point values. This provides an
