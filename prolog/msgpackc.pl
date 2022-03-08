@@ -410,7 +410,7 @@ msgpack_fixstr(Str) -->
     { var(Str),
       !
     },
-    byte(Format),
+    uint8(Format),
     { fixstr_format_length(Format, Length),
       length(Bytes, Length)
     },
@@ -425,7 +425,7 @@ msgpack_fixstr(Str) -->
       length(Bytes, Length),
       fixstr_format_length(Format, Length)
     },
-    byte(Format),
+    [Format],
     sequence(byte, Bytes).
 
 fixstr_format_length(Format, Length), var(Format) =>
@@ -582,7 +582,7 @@ msgpack_fixarray(OnElement, Array) -->
     { var(Array),
       !
     },
-    byte(Format),
+    uint8(Format),
     { fixarray_format_length(Format, Length),
       length(Array, Length)
     },
