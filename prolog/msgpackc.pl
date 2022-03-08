@@ -105,9 +105,9 @@ improvements might aggregate to milliseconds.
 
 :- multifile type_ext_hook/3.
 
-%!  msgpack(?Object:compound)// is nondet.
+%!  msgpack(?Term:compound)// is nondet.
 %
-%   Where Object is a compound arity-1 functor, never a list term. The
+%   Where Term is a compound arity-1 functor, never a list term. The
 %   functor carries the format choice.
 %
 %   Packing arrays and maps necessarily recurses. Array elements are
