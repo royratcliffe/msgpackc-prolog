@@ -48,10 +48,11 @@ The goal of this delicate balance between Prolog and C, between
 definite-clause grammar and low-level bit manipulation, aims to retain
 the flexibility and elegance of forward and backward unification between
 Message Pack and byte streams while gleaning the performance benefits of
-a C-based foreign support library. Much of the pure C Message Pack
-implementation concerns storage and memory management. To a large
-extent, any Prolog implementation can ignore memory. Prolog was not
-designed for deeply-embedded hardware targets with extreme memory
+a C-based foreign support library.
+
+Much of the pure C Message Pack implementation concerns storage and memory
+management. To a large extent, any Prolog implementation can ignore memory.
+Prolog was not designed for deeply-embedded hardware targets with extreme memory
 limitations.
 
 ## Functors, fundamentals and primitives
