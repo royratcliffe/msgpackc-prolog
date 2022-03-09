@@ -103,7 +103,7 @@ improvements might aggregate to milliseconds.
     msgpack_map(3, ?, ?, ?),
     msgpack_dict(3, ?, ?, ?).
 
-:- multifile type_ext_hook/3.
+:- multifile msgpack:type_ext_hook/3.
 
 %!  msgpack(?Term:compound)// is nondet.
 %
@@ -722,13 +722,13 @@ msgpack_dict(OnPair, Dict) -->
 msgpack_ext(Term) -->
     { ground(Term),
       !,
-      type_ext_hook(Type, Ext, Term)
+      msgpack:type_ext_hook(Type, Ext, Term)
     },
     msgpack_ext(Type, Ext).
 msgpack_ext(Term) -->
     msgpack_ext(Type, Ext),
     !,
-    { type_ext_hook(Type, Ext, Term)
+    { msgpack:type_ext_hook(Type, Ext, Term)
     }.
 
 %!  msgpack_ext(?Type, ?Ext)// is semidet.
@@ -791,7 +791,7 @@ ext_width_format( 8, 0xc7).
 ext_width_format(16, 0xc8).
 ext_width_format(32, 0xc9).
 
-%!  type_ext_hook(Type:integer, Ext:list, Term) is semidet.
+%!  msgpack:type_ext_hook(Type:integer, Ext:list, Term) is semidet.
 %
 %   Parses the extension byte block.
 %
@@ -799,7 +799,7 @@ ext_width_format(32, 0xc9).
 %   also called Unix epoch time. Three alternative encodings exist: 4
 %   bytes, 8 bytes and 12 bytes.
 
-type_ext_hook(-1, Ext, timestamp(Epoch)) :-
+msgpack:type_ext_hook(-1, Ext, timestamp(Epoch)) :-
     once(phrase(timestamp(Epoch), Ext)).
 
 timestamp(Epoch) -->
