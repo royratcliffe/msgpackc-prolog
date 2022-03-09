@@ -74,6 +74,7 @@ msgpack(nil) --> msgpack_nil, !.
 msgpack(bool(false)) --> msgpack_false, !.
 msgpack(bool(true)) --> msgpack_true, !.
 msgpack(int(Int)) --> msgpack_int(Int), !.
+msgpack(float(Float)) --> msgpack_float(Float), !.
 msgpack(str(Str)) --> msgpack_str(Str), !.
 msgpack(bin(Bin)) --> msgpack_bin(Bin), !.
 msgpack(array(Array)) --> msgpack_array(msgpack, Array), !.
