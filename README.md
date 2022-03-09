@@ -42,7 +42,10 @@ Term = array([str("hello"), str("world")]).
 
 ## Project goals
 
-Primarily implemented in Prolog but with core highly-optimised C support functions for handling endian transformations via machine-code byte swapping, re-interpreting between ordered bytes (octets) and IEEE-754 floating-point numbers and integers of different bit-widths.
+Primarily implemented in Prolog but with core highly-optimised C support
+functions for handling endian transformations via machine-code byte swapping,
+re-interpreting between ordered bytes (octets) and IEEE-754 floating-point
+numbers and integers of different bit-widths.
 
 The goal of this delicate balance between Prolog and C, between
 definite-clause grammar and low-level bit manipulation, aims to retain
