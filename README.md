@@ -89,6 +89,28 @@ terms.
 The fundamental layer via `msgpack_object//1` attempts to match messages to
 fundamental types.
 
+## Integer space
+
+The `msgpack//1` implementation does the correct thing when attempting to render
+integers at integer boundaries; it correctly fails.
+
+```prolog
+A is 1 << 64, phrase(sequence(msgpack, [int(A)]), B)
+```
+
+Prolog utilises the GNU Multiple Precision Arithmetic library when values fall
+outside the bit-width limits of the host machine. Term `A` exceeds 64 bits in
+the example above; Prolog happily computes the correct value within integer
+space but it requires 65 bits at least in order to store the value in an
+ordinary flat machine word. Hence fails the phrase when attempting to find a
+solution to `int(A)` since no available representation of a Message Pack integer
+accomodates a 65-bit value.
+
+The same phrase for `float(A)` _will_ succeed however by rendering a Message
+Pack 32-bit float. A float term accepts integers. They convert to equivalent
+floating-point values; in that case matching IEEE-754 big-endian sequence `[95,
+0, 0, 0]` as a Prolog byte-code list.
+
 ## Useful links
 
 * [MessagePack specification](https://github.com/msgpack/msgpack/blob/master/spec.md)
