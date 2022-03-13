@@ -103,11 +103,11 @@ improvements might aggregate to milliseconds.
     msgpack_map(3, ?, ?, ?),
     msgpack_dict(3, ?, ?, ?).
 
-:- multifile type_ext_hook/3.
+:- multifile msgpack:type_ext_hook/3.
 
-%!  msgpack(?Object:compound)// is nondet.
+%!  msgpack(?Term:compound)// is nondet.
 %
-%   Where Object is a compound arity-1 functor, never a list term. The
+%   Where Term is a compound arity-1 functor, never a list term. The
 %   functor carries the format choice.
 %
 %   Packing arrays and maps necessarily recurses. Array elements are
@@ -153,6 +153,10 @@ msgpack(Term) --> msgpack_ext(Term).
 %
 %   Prolog has no native type for raw binary objects in the vein of R's
 %   raw vector.
+%
+%   Notice that integer comes before float. This is important because
+%   Prolog integers can render as floats and vice versa provided that
+%   the integer is signed; it fails if unsigned.
 
 msgpack_object(nil) --> msgpack_nil, !.
 msgpack_object(false) --> msgpack_false, !.
@@ -253,11 +257,11 @@ msgpack_true --> [0xc3].
 %   double representation is redundant because the 32-bit representation
 %   fully meets the resolution requirements of the float value.
 %
-%   The arity-1 version of the predicate duplicates the encoding
-%   assumptions. The structure aims to implement precision width
-%   selection but _without_ re-rendering. It first unifies a 64-bit
-%   float with eight bytes. Parsing from bytes to Float will fail if
-%   the bytes run out at the end of the byte stream.
+%   The arity-1 (+) mode version of the predicate duplicates the
+%   encoding assumptions. The structure aims to implement precision
+%   width selection but _without_ re-rendering. It first unifies a
+%   64-bit float with eight bytes. Parsing from bytes to Float will fail
+%   if the bytes run out at the end of the byte stream.
 %
 %   Predicates float32//1 and float64//1 unify with integer-valued
 %   floats as well as floating-point values. This provides an
@@ -269,7 +273,7 @@ msgpack_float(Float) -->
   },
   !,
   [0xcb|Bytes].
-msgpack_float(Float) --> [0xca], float32(Float).
+msgpack_float(Float) --> msgpack_float(_, Float), !.
 
 msgpack_float(32, Float) --> [0xca], float32(Float).
 msgpack_float(64, Float) --> [0xcb], float64(Float).
@@ -410,7 +414,7 @@ msgpack_fixstr(Str) -->
     { var(Str),
       !
     },
-    byte(Format),
+    uint8(Format),
     { fixstr_format_length(Format, Length),
       length(Bytes, Length)
     },
@@ -425,7 +429,7 @@ msgpack_fixstr(Str) -->
       length(Bytes, Length),
       fixstr_format_length(Format, Length)
     },
-    byte(Format),
+    [Format],
     sequence(byte, Bytes).
 
 fixstr_format_length(Format, Length), var(Format) =>
@@ -582,7 +586,7 @@ msgpack_fixarray(OnElement, Array) -->
     { var(Array),
       !
     },
-    byte(Format),
+    uint8(Format),
     { fixarray_format_length(Format, Length),
       length(Array, Length)
     },
@@ -718,13 +722,13 @@ msgpack_dict(OnPair, Dict) -->
 msgpack_ext(Term) -->
     { ground(Term),
       !,
-      type_ext_hook(Type, Ext, Term)
+      msgpack:type_ext_hook(Type, Ext, Term)
     },
     msgpack_ext(Type, Ext).
 msgpack_ext(Term) -->
     msgpack_ext(Type, Ext),
     !,
-    { type_ext_hook(Type, Ext, Term)
+    { msgpack:type_ext_hook(Type, Ext, Term)
     }.
 
 %!  msgpack_ext(?Type, ?Ext)// is semidet.
@@ -787,7 +791,7 @@ ext_width_format( 8, 0xc7).
 ext_width_format(16, 0xc8).
 ext_width_format(32, 0xc9).
 
-%!  type_ext_hook(Type:integer, Ext:list, Term) is semidet.
+%!  msgpack:type_ext_hook(Type:integer, Ext:list, Term) is semidet.
 %
 %   Parses the extension byte block.
 %
@@ -795,61 +799,65 @@ ext_width_format(32, 0xc9).
 %   also called Unix epoch time. Three alternative encodings exist: 4
 %   bytes, 8 bytes and 12 bytes.
 
-type_ext_hook(-1, Ext, timestamp(Epoch)) :-
+msgpack:type_ext_hook(-1, Ext, timestamp(Epoch)) :-
     once(phrase(timestamp(Epoch), Ext)).
 
 timestamp(Epoch) -->
     { var(Epoch)
     },
-    int32(Epoch).
+    epoch(Epoch).
 timestamp(Epoch) -->
-    { var(Epoch)
+    { number(Epoch),
+      Epoch >= 0,
+      tv(Epoch, Seconds, NanoSeconds)
     },
+    sec_nsec(Seconds, NanoSeconds).
+
+epoch(Epoch) -->
+    int32(Epoch).
+epoch(Epoch) -->
     uint64(UInt64),
     { NanoSeconds is UInt64 >> 34,
       NanoSeconds < 1 000 000 000,
       Seconds is UInt64 /\ ((1 << 34) - 1),
       tv(Epoch, Seconds, NanoSeconds)
     }.
-timestamp(Epoch) -->
-    { var(Epoch)
-    },
+epoch(Epoch) -->
     int32(NanoSeconds),
     int64(Seconds),
     { tv(Epoch, Seconds, NanoSeconds)
     }.
-timestamp(Epoch) -->
-    { number(Epoch),
-      tv(Epoch, Seconds, 0)
+
+sec_nsec(Seconds, 0) -->
+    { Seconds < (1 << 32)
     },
     int32(Seconds).
-timestamp(Epoch) -->
-    { number(Epoch),
-      Epoch >= 0,
-      tv(Epoch, Seconds, NanoSeconds),
-      Seconds < (1 << 34),
+sec_nsec(Seconds, NanoSeconds) -->
+    { Seconds < (1 << 34),
       UInt64 is (NanoSeconds << 34) \/ Seconds
     },
     uint64(UInt64).
-timestamp(Epoch) -->
-    { number(Epoch),
-      tv(Epoch, Seconds, NanoSeconds)
-    },
+sec_nsec(Seconds, NanoSeconds) -->
     int32(NanoSeconds),
     int64(Seconds).
 
-%!  tv(Epoch, Sec, NSec) is det.
+%!  tv(?Epoch:number, ?Sec:number, ?NSec:number) is det.
 %
-%   Uses floor/1 when computing NSec. Time only counts completed
-%   nanoseconds and time runs up. Asking for the integer part of a float
-%   does *not* give an integer.
+%   Uses floor/1 when computing Sec and round/1 for NSec. Time only
+%   counts completed seconds and time runs up. Asking for the
+%   integer part of a float does *not* give an integer. It gives the
+%   float-point value that matches the integer.
+%
+%   The arguments have number type by design. The predicate supports
+%   negatives; Epoch of -1.1 for example gives -1 seconds, -100,000,000
+%   nanoseconds.
 
 tv(Epoch, Sec, NSec), var(Epoch) =>
     abs(NSec) < 1 000 000 000,
     Epoch is Sec + (NSec / 1e9).
 tv(Epoch, Sec, NSec), number(Epoch) =>
     Sec is floor(float_integer_part(Epoch)),
-    NSec is floor(1e9 * float_fractional_part(Epoch)).
+    NSec is round(1e9 * float_fractional_part(Epoch)).
 
 %!  fix_format_length(Fix, Format, Length) is semidet.
 %

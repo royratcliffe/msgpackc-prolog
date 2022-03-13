@@ -50,31 +50,36 @@ a note for the direct dependency.
  *
  * Fails if it sees integer byte values outside the acceptable range,
  * zero through 255 inclusive. Failure always updates the given byte
- * buffer with the value of the bytes successfully seen.
+ * buffer with the value of the bytes successfully seen. Automatically
+ * fails if negative because `PL_get_uint64()` fails for signed
+ * integers.
  */
 int
 get_list_bytes(term_t Bytes0, term_t Bytes, size_t count, uint8_t *bytes)
 { term_t Tail = PL_copy_term_ref(Bytes0);
   term_t Byte = PL_new_term_ref();
   while (count--)
-  { int value;
+  { uint64_t value;
     if (!PL_get_list(Tail, Byte, Tail) ||
-        !PL_get_integer(Byte, &value) || value < 0 || value > UINT8_MAX) PL_fail;
+        !PL_get_uint64(Byte, &value) || value > UINT8_MAX) PL_fail;
     *bytes++ = value;
   }
   return PL_unify(Bytes, Tail);
 }
 
 /*
- * Relies on the compiler to correctly expand an eight-bit byte to a
- * signed integer _without_ performing sign extension.
+ * Relies on the compiler to correctly expand an eight-bit byte to an
+ * unsigned integer _without_ performing sign extension. Relies on the C
+ * compiler to zero-extend `unsigned char` to `unsigned long long` and
+ * no need to check for failure since all unsigned integers subsume all
+ * proper integer byte values.
  */
 int
 unify_list_bytes(term_t Bytes0, term_t Bytes, size_t count, const uint8_t *bytes)
 { term_t Tail = PL_copy_term_ref(Bytes0);
   term_t Byte = PL_new_term_ref();
   while (count--)
-    if (!PL_unify_list(Tail, Byte, Tail) || !PL_unify_integer(Byte, *bytes++)) PL_fail;
+    if (!PL_unify_list(Tail, Byte, Tail) || !PL_unify_uint64(Byte, *bytes++)) PL_fail;
   return PL_unify(Bytes, Tail);
 }
 

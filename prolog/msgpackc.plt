@@ -1,5 +1,7 @@
 :- begin_tests(msgpackc).
 :- use_module(msgpackc).
+:- use_module(library(plunit)).
+:- use_module(library(dcg/high_order)).
 
 test(msgpack, true(A == [0b1001 0001, 123])) :-
     phrase(msgpackc:msgpack(array([int(123)])), A).
@@ -8,9 +10,14 @@ test(msgpack, true(A == [0b1001 0001, 0b1001 0001, 123])) :-
 test(msgpack, true(B == map([int(1)-str("x")]))) :-
     phrase(msgpack(map([int(1)-str("x")])), A),
     phrase(msgpack(B), A).
+test(msgpack, true(Float == 1.0e+18)) :-
+    phrase(msgpack(float(Float)), [203, 67, 171, 193, 109, 103, 78, 200, 0]).
 
 test(msgpack, true(B == map([str("a")-int(1)]))) :-
     phrase(msgpack_object(_{a:1}), A), phrase(msgpack(B), A).
+
+test(sequence_msgpack, true(A == [192, 192, 192])) :-
+    phrase(sequence(msgpack, [nil, nil, nil]), A).
 
 test(msgpack_object, true(A == [0x80])) :-
     phrase(msgpack_object(_{}), A).
@@ -100,5 +107,18 @@ test(msgpack_bin, true(A == [])) :-
     phrase(msgpack_bin(8, A), [0xc4, 0]).
 test(msgpack_bin, true(A == [1, 2, 3])) :-
     phrase(msgpack_bin(8, A), [0xc4, 3, 1, 2, 3]).
+
+test(timestamp, true(A == [214, 255, 0, 0, 0, 0])) :-
+    phrase(sequence(msgpack, [timestamp(0)]), A).
+
+endian(Endian) :- term_hash(aap, Hash), endian(Hash, Endian).
+
+endian(9270206, little).
+endian(16674642, big).
+
+test(le, [ condition(endian(little)),
+           true(A == [65, 66, 67, 68, 69, 70, 71, 72])
+         ]) :-
+    phrase(msgpackc:float64(2.39373654120722785592079162598e6), A).
 
 :- end_tests(msgpackc).
