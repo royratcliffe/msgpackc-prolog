@@ -12,7 +12,11 @@ Install the Prolog pack in SWI-Prolog using:
 pack_install(msgpackc).
 ```
 
-Pack messages via Definite-Clause Grammar `msgpack//1` using compound terms. Prolog grammars operate by "unifying" terms with codes, in this case only byte codes rather than Unicodes. Unification works in both directions and even with partial knowns. The grammar back-tracks through all possible solutions non-deterministically until it finds one, else fails.
+Pack messages via Definite-Clause Grammar `msgpack//1` using compound terms.
+Prolog grammars operate by "unifying" terms with codes, in this case only byte
+codes rather than Unicodes. Unification works in both directions and even with
+partial knowns. The grammar back-tracks through all possible solutions
+non-deterministically until it finds one, else fails.
 
 The implementation supports all the MessagePack formats including timestamps and
 any other extensions. The multi-file predicate hook `msgpack:type_ext_hook/3`
