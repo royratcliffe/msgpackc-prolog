@@ -70,8 +70,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 :- use_foreign_library(foreign(msgpackc)).
 
-:- use_module(memfilesio).
-
 /** <module> C-Based Message Pack for SWI-Prolog
 
 The predicates have three general categories.
@@ -172,7 +170,7 @@ msgpack_object(Float) -->
     },
     !.
 msgpack_object(Str) --> msgpack_str(Str), !.
-msgpack_object(bin(MemoryFile)) --> msgpack_memory_file(MemoryFile), !.
+msgpack_object(bin(Bin)) --> msgpack_bin(Bin), !.
 msgpack_object(Array) --> msgpack_array(msgpack_object, Array), !.
 msgpack_object(Map) -->
     msgpack_dict(msgpack_pair(msgpack_key, msgpack_object), Map),
@@ -203,16 +201,6 @@ msgpack_key(Key) -->
       atom_string(Key, Str)
     },
     msgpack_str(Str).
-
-/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    You cannot use a MemoryFile as a ground term because no way of
-    determining whether or not the incoming term is a memory file
-    exists without attempting to open it.
-
-msgpack_object(MemoryFile) --> msgpack_memory_file(MemoryFile).
-
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 %!  msgpack_objects(?Objects)// is semidet.
 %
@@ -506,18 +494,6 @@ str_width_format(32, 0xdb).
 %   byte-list has more than four thousand megabytes.
 
 msgpack_bin(Bytes) --> msgpack_bin(_, Bytes), !.
-
-msgpack_memory_file(MemoryFile) -->
-    { var(MemoryFile),
-      !
-    },
-    msgpack_bin(Bytes),
-    { memory_file_bytes(MemoryFile, Bytes)
-    }.
-msgpack_memory_file(MemoryFile) -->
-    { memory_file_bytes(MemoryFile, Bytes)
-    },
-    msgpack_bin(Bytes).
 
 %!  msgpack_bin(?Width, ?Bytes:list)// is nondet.
 %
