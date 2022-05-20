@@ -709,7 +709,7 @@ msgpack_ext(Term) -->
 
 %!  msgpack_ext(?Type, ?Ext)// is semidet.
 %
-%   Type is a signed integer. Ext is a list of byte codes
+%   Type is a signed integer. Ext is a list of byte codes.
 
 msgpack_ext(Type, Ext) --> msgpack_fixext(Type, Ext), !.
 msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext), !.
