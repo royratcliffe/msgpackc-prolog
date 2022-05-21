@@ -57,11 +57,6 @@ the flexibility and elegance of forward and backward unification between
 MessagePack and byte streams while gleaning the performance benefits of
 a C-based foreign support library.
 
-Much of the pure C MessagePack implementation concerns storage and memory
-management. To a large extent, any Prolog implementation can ignore memory.
-Prolog was not designed for deeply-embedded hardware targets with extreme memory
-limitations.
-
 ## Functors, fundamentals and primitives
 
 The package presents a three-layered interface.
