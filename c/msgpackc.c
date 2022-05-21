@@ -1,7 +1,7 @@
 /*  File:    msgpackc.c
     Author:  Roy Ratcliffe
     Created: Mar  6 2022
-    Purpose: C-Based Message Pack for SWI-Prolog
+    Purpose: C-Based MessagePack for SWI-Prolog
 
 Copyright (c) 2022, Roy Ratcliffe, Northumberland, United Kingdom
 
