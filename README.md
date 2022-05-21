@@ -90,8 +90,11 @@ High-order grammar predicates will unify with message sequences, e.g.
 `sequence(msgpack, Terms)` where Terms is a lists of `msgpack//1` argument
 terms.
 
-The fundamental layer via `msgpack_object//1` attempts to match messages to
-fundamental types.
+The fundamental layer via `msgpack_object//1` optimally matches messages to
+fundamental types. Take integers for example. Phrase `phrase(msgpack_object(1),
+Codes)` gives you one octet `[1]` but `phrase(msgpack_object(1 000), Codes)`
+gives you three, `[205, 3, 232]`. Yet you still see an integer when you reverse
+the phrase and ask `Codes` for their corresponding term.
 
 ## Integer space
 
