@@ -1,7 +1,7 @@
 /*  File:    msgpackc.pl
     Author:  Roy Ratcliffe
     Created: Jan 19 2022
-    Purpose: C-Based Message Pack for SWI-Prolog
+    Purpose: C-Based MessagePack for SWI-Prolog
 
 Copyright (c) 2022, Roy Ratcliffe, Northumberland, United Kingdom
 
@@ -70,14 +70,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 :- use_foreign_library(foreign(msgpackc)).
 
-/** <module> C-Based Message Pack for SWI-Prolog
+/** <module> C-Based MessagePack for SWI-Prolog
 
 The predicates have three general categories.
 
     1. High-order recursive for normal use by application software.
     2. Parameterised mid-level grammar components such as `msgpack_nil`
     designed for two-way unification between fundamental types and
-    their Message Pack byte encoded representations.
+    their MessagePack byte encoded representations.
     3. Low-level C predicates and functions interfacing with the machine
     byte-swapping hardware.
 
@@ -125,12 +125,12 @@ msgpack(Term) --> msgpack_ext(Term).
 
 %!  msgpack_object(?Object)// is semidet.
 %
-%   Encodes and decodes a single Message Pack object. Term encodes an
+%   Encodes and decodes a single MessagePack object. Term encodes an
 %   object as follows.
 %
 %       1. The _nil_ object becomes Prolog `nil` atom rather than `[]`
 %       which Prolog calls "nil," the empty list termination. Prolog `[]`
-%       decodes an empty Message Pack array.
+%       decodes an empty MessagePack array.
 %       2. Booleans become Prolog atoms `false` and `true`.
 %       3. Integers become Prolog integers.
 %
@@ -146,7 +146,7 @@ msgpack(Term) --> msgpack_ext(Term).
 %
 %   Unsigned and signed integers share a common pattern. The
 %   least-significant two bits, 00 through 11, select eight through 64
-%   bits of width. The ordering of the Message Pack specification
+%   bits of width. The ordering of the MessagePack specification
 %   arranges the types in order to exploit this feature.
 %
 %   Prolog has no native type for raw binary objects in the vein of R's
@@ -204,7 +204,7 @@ msgpack_key(Key) -->
 
 %!  msgpack_objects(?Objects)// is semidet.
 %
-%   Zero or more Message Pack objects.
+%   Zero or more MessagePack objects.
 
 msgpack_objects(Objects) --> sequence(msgpack_object, Objects).
 
@@ -344,7 +344,7 @@ msgpack_fixint(8, Int) --> fixint8(Int).
 %   the Int must not fall below -32. All other constraints also
 %   apply for signed 8-bit integers. Rather than falling between -128
 %   and 127 however, the _fixed_ 8-bit integer does not overlap the bit
-%   patterns reserved for other Message Pack type codes.
+%   patterns reserved for other MessagePack type codes.
 
 fixint8(Int) -->
     int8(Int),
@@ -395,7 +395,7 @@ msgpack_str(Str) --> msgpack_str(_, Str), !.
 
 %!  msgpack_fixstr(?Str)// is semidet.
 %
-%   Unifies Message Pack byte codes with fixed Str of length between
+%   Unifies MessagePack byte codes with fixed Str of length between
 %   0 and 31 inclusive.
 
 msgpack_fixstr(Str) -->
@@ -434,7 +434,7 @@ fixstr_format(Format) :-
 %!  msgpack_str(?Width, ?Str)// is semidet.
 %
 %   Refactors common string-byte unification utilised by all string
-%   grammars for the Message Pack protocol's 8, 16 and 32 bit lengths.
+%   grammars for the MessagePack protocol's 8, 16 and 32 bit lengths.
 %   Unifies for Length number of bytes for Str. Length is *not* the
 %   length of Str in Unicodes but the number of bytes in its UTF-8
 %   representation.
@@ -487,7 +487,7 @@ str_width_format(32, 0xdb).
 
 %!  msgpack_bin(?Bytes)// is semidet.
 %
-%   Succeeds only once when Bytes unifies with the Message Pack byte
+%   Succeeds only once when Bytes unifies with the MessagePack byte
 %   stream for the first time. Relies on the width ordering: low to
 %   high and attempts 8 bits first, 16 bits next and finally 32. Fails
 %   if 32 bits is not enough to unify the number of bytes because the
@@ -552,7 +552,7 @@ msgpack_array(OnElement, Array) --> msgpack_array(OnElement, _, Array), !.
 %!  msgpack_fixarray(:OnElement, Array)// is semidet.
 %!  msgpack_array(:OnElement, ?Width, ?Array)// is nondet.
 %
-%   Non-deterministically unify with Array of Message Pack objects, zero
+%   Non-deterministically unify with Array of MessagePack objects, zero
 %   or more msgpack_object(Object) phrases.
 %
 %   Does not prescribe how to extract the elements. OnElement defines
@@ -709,7 +709,7 @@ msgpack_ext(Term) -->
 
 %!  msgpack_ext(?Type, ?Ext)// is semidet.
 %
-%   Type is a signed integer. Ext is a list of byte codes
+%   Type is a signed integer. Ext is a list of byte codes.
 
 msgpack_ext(Type, Ext) --> msgpack_fixext(Type, Ext), !.
 msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext), !.
@@ -882,7 +882,7 @@ int(64, Int) --> int64(Int).
 %!  uint8(?Int)// is semidet.
 %!  int8(?Int)// is semidet.
 %
-%   Simplifies the Message Pack grammar by asserting Byte constraints.
+%   Simplifies the MessagePack grammar by asserting Byte constraints.
 %   Every Byte is an integer in-between 0 and 255 inclusive; fails
 %   semi-deterministically otherwise. Other high-level grammer
 %   components can presume these contraints as a baseline and assert any
@@ -894,7 +894,7 @@ int(64, Int) --> int64(Int).
 %
 %   Importantly, phrases such as the following example fail. There _is
 %   no_ byte sequence that represents an unsigned integer in 8 bits.
-%   Other sub-grammars for Message Pack depend on this type of
+%   Other sub-grammars for MessagePack depend on this type of
 %   last-stage back-tracking while exploring the realm of possible
 %   matches.
 %

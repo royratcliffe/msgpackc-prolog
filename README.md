@@ -1,8 +1,8 @@
-# Message Pack for SWI-Prolog using C
+# MessagePack for SWI-Prolog using C
 
 [![test](https://github.com/royratcliffe/msgpackc-prolog/actions/workflows/test.yaml/badge.svg)](https://github.com/royratcliffe/msgpackc-prolog/actions/workflows/test.yaml)
 ![cov](https://shields.io/endpoint?url=https://gist.githubusercontent.com/royratcliffe/ccccef2ac1329551794f2a466ee61014/raw/cov.json)
-![fail](https://shields.io/endpoint?url=https://gist.githubusercontent.com/royratcliffe/ccccef2ac1329551794f2a466ee61014/raw/fail.json)
+<!-- ![fail](https://shields.io/endpoint?url=https://gist.githubusercontent.com/royratcliffe/ccccef2ac1329551794f2a466ee61014/raw/fail.json) -->
 
 ## Usage
 
@@ -54,13 +54,8 @@ numbers and integers of different bit-widths.
 The goal of this delicate balance between Prolog and C, between
 definite-clause grammar and low-level bit manipulation, aims to retain
 the flexibility and elegance of forward and backward unification between
-Message Pack and byte streams while gleaning the performance benefits of
+MessagePack and byte streams while gleaning the performance benefits of
 a C-based foreign support library.
-
-Much of the pure C Message Pack implementation concerns storage and memory
-management. To a large extent, any Prolog implementation can ignore memory.
-Prolog was not designed for deeply-embedded hardware targets with extreme memory
-limitations.
 
 ## Functors, fundamentals and primitives
 
@@ -95,8 +90,11 @@ High-order grammar predicates will unify with message sequences, e.g.
 `sequence(msgpack, Terms)` where Terms is a lists of `msgpack//1` argument
 terms.
 
-The fundamental layer via `msgpack_object//1` attempts to match messages to
-fundamental types.
+The fundamental layer via `msgpack_object//1` optimally matches messages to
+fundamental types. Take integers for example. Phrase `phrase(msgpack_object(1),
+Codes)` gives you one octet `[1]` but `phrase(msgpack_object(1 000), Codes)`
+gives you three, `[205, 3, 232]`. Yet you still see an integer when you reverse
+the phrase and ask `Codes` for their corresponding term.
 
 ## Integer space
 
@@ -112,7 +110,7 @@ outside the bit-width limits of the host machine. Term `A` exceeds 64 bits in
 the example above; Prolog happily computes the correct value within integer
 space but it requires 65 bits at least in order to store the value in an
 ordinary flat machine word. Hence fails the phrase when attempting to find a
-solution to `int(A)` since no available representation of a Message Pack integer
+solution to `int(A)` since no available representation of a MessagePack integer
 accomodates a 65-bit value.
 
 The same phrase for `float(A)` _will_ succeed however by rendering a Message
