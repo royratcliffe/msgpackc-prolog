@@ -3,6 +3,10 @@
 Uses [Semantic Versioning](https://semver.org/). Always [keep a change
 log](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.1] - 2022-05-21
+### Changed
+- Comment out misleading fail coverage
+
 ## [0.2.0] - 2022-03-19
 ### Removed
 - memfilesio module
