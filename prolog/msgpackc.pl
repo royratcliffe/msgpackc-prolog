@@ -65,7 +65,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             msgpack_ext//1,                     % ?Term
             msgpack_ext//2                      % ?Type,?Ext
           ]).
-:- autoload(library(dcg/high_order), [sequence//2, sequence/4]).
+:- autoload(library(dcg/high_order), [sequence//2]).
 :- autoload(library(utf8), [utf8_codes/3]).
 
 :- use_foreign_library(foreign(msgpackc)).
