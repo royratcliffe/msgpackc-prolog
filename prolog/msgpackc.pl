@@ -679,7 +679,8 @@ msgpack_dict(OnPair, Dict) -->
     { dict_create(Dict, _, Pairs)
     }.
 msgpack_dict(OnPair, Dict) -->
-    { dict_pairs(Dict, _, Pairs)
+    { is_dict(Dict),
+      dict_pairs(Dict, _, Pairs)
     },
     msgpack_map(OnPair, Pairs).
 
