@@ -17,6 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: royratcliffe/swi-prolog-pack-cover@patch-1
-        env:
+      - env:
           GHAPI_PAT: ${{ secrets.GHAPI_PAT }}
           COVFAIL_GISTID: ${{ secrets.COVFAIL_GISTID }}
