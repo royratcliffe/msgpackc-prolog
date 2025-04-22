@@ -3,7 +3,7 @@
     Created: Jan 19 2022
     Purpose: C-Based MessagePack for SWI-Prolog
 
-Copyright (c) 2022, Roy Ratcliffe, Northumberland, United Kingdom
+Copyright (c) 2022, 2024, Roy Ratcliffe, Northumberland, United Kingdom
 
 Permission is hereby granted, free of charge,  to any person obtaining a
 copy  of  this  software  and    associated   documentation  files  (the
