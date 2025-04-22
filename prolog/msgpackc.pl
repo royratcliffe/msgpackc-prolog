@@ -262,7 +262,7 @@ msgpack_float(Float) -->
     !,
     [0xcb],
     Bytes.
-msgpack_float(Float) --> msgpack_float(_, Float), !.
+msgpack_float(Float) --> msgpack_float(_, Float).
 
 msgpack_float(32, Float) --> [0xca], float32(Float).
 msgpack_float(64, Float) --> [0xcb], float64(Float).
@@ -392,7 +392,7 @@ msgpack_int(64, Int) --> [0xd3], int64(Int).
 %   Unifies Str with the shortest packed UTF-8 string message.
 
 msgpack_str(Str) --> msgpack_fixstr(Str), !.
-msgpack_str(Str) --> msgpack_str(_, Str), !.
+msgpack_str(Str) --> msgpack_str(_, Str).
 
 %!  msgpack_fixstr(?Str)// is semidet.
 %
@@ -494,7 +494,7 @@ str_width_format(32, 0xdb).
 %   if 32 bits is not enough to unify the number of bytes because the
 %   byte-list has more than four thousand megabytes.
 
-msgpack_bin(Bytes) --> msgpack_bin(_, Bytes), !.
+msgpack_bin(Bytes) --> msgpack_bin(_, Bytes).
 
 %!  msgpack_bin(?Width, ?Bytes:list)// is nondet.
 %
@@ -548,7 +548,7 @@ bin_width_format(32, 0xc6).
 %   predicate.
 
 msgpack_array(OnElement, Array) --> msgpack_fixarray(OnElement, Array), !.
-msgpack_array(OnElement, Array) --> msgpack_array(OnElement, _, Array), !.
+msgpack_array(OnElement, Array) --> msgpack_array(OnElement, _, Array).
 
 %!  msgpack_fixarray(:OnElement, Array)// is semidet.
 %!  msgpack_array(:OnElement, ?Width, ?Array)// is nondet.
@@ -714,7 +714,7 @@ msgpack_ext(Term) -->
 %   Type is a signed integer. Ext is a list of byte codes.
 
 msgpack_ext(Type, Ext) --> msgpack_fixext(Type, Ext), !.
-msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext), !.
+msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext).
 
 msgpack_fixext(Type, Ext) -->
     { var(Type),
