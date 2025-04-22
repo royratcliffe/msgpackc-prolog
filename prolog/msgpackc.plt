@@ -99,6 +99,12 @@ test(msgpack_str,
                 ])) :-
     phrase(msgpackc:msgpack_str(A, "hello"), B).
 
+test(msgpack_array, fail) :-
+    phrase(msgpack_array(msgpack, _{}), _).
+
+test(msgpack_map, A == [128]) :-
+    phrase(msgpack_map([]), A).
+
 test(msgpack_bin, true(A == [0xc4, 0])) :-
     phrase(msgpack_bin(8, []), A).
 test(msgpack_bin, true(A == [0xc4, 3, 1, 2, 3])) :-
