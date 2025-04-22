@@ -256,11 +256,12 @@ msgpack_true --> [0xc3].
 %   alternative representation for many integers.
 
 msgpack_float(Float) -->
-  { float64(Float, Bytes, []),
-    Bytes \= [_, _, _, _, 0, 0, 0, 0]
-  },
-  !,
-  [0xcb|Bytes].
+    { float64(Float, Bytes, []),
+      Bytes \= [_, _, _, _, 0, 0, 0, 0]
+    },
+    !,
+    [0xcb],
+    Bytes.
 msgpack_float(Float) --> msgpack_float(_, Float), !.
 
 msgpack_float(32, Float) --> [0xca], float32(Float).
