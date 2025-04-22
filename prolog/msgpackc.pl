@@ -30,6 +30,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           [ msgpack//1,                         % ?Term
 
             msgpack_object//1,                  % ?Object
+            msgpack_key//1,                     % ?Key
             msgpack_objects//1,                 % ?Objects
 
             msgpack_nil//0,
@@ -60,6 +61,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
             % map format family
             msgpack_map//2,                     % :OnPair,?Map
+            msgpack_map//1,                     % ?Map
+            msgpack_pair//3,                    % :OnKey,:OnValue,KeyValuePair
 
             % ext format family
             msgpack_ext//1,                     % ?Term
@@ -120,7 +123,7 @@ msgpack(float(Float)) --> msgpack_float(Float), !.
 msgpack(str(Str)) --> msgpack_str(Str), !.
 msgpack(bin(Bin)) --> msgpack_bin(Bin), !.
 msgpack(array(Array)) --> msgpack_array(msgpack, Array), !.
-msgpack(map(Map)) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map), !.
+msgpack(map(Map)) --> msgpack_map(Map), !.
 msgpack(Term) --> msgpack_ext(Term).
 
 %!  msgpack_object(?Object)// is semidet.
@@ -620,11 +623,14 @@ array_width_format(32, 0xdd).
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 %!  msgpack_map(:OnPair, ?Map:list)// is semidet.
+%!  msgpack_map(?Map:list)// is semidet.
 %
 %   Unify with Map using OnPair as the pair-wise grammar.
 
 msgpack_map(OnPair, Map) --> msgpack_fixmap(OnPair, Map), !.
-msgpack_map(OnPair, Map) --> msgpack_map(OnPair, _, Map), !.
+msgpack_map(OnPair, Map) --> msgpack_map(OnPair, _, Map).
+
+msgpack_map(Map) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map).
 
 msgpack_fixmap(OnPair, Map) -->
     { var(Map),
@@ -667,6 +673,8 @@ msgpack_map(OnPair, Width, Map) -->
 
 map_width_format(16, 0xde).
 map_width_format(32, 0xdf).
+
+%!  msgpack_pair(:OnKey, :OnValue, KeyValuePair)// is semidet.
 
 msgpack_pair(OnKey, OnValue, Key-Value) -->
     call(OnKey, Key),
