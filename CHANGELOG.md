@@ -3,6 +3,12 @@
 Uses [Semantic Versioning](https://semver.org/). Always [keep a change
 log](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.2] - 2025-04-21
+### Fixed
+- The predicate `msgpack_dict` will fail if the argument provided is not a
+  dictionary.
+- Latest SWI Prolog does not like `[0xcb|Bytes]`.
+
 ## [0.2.1] - 2022-05-21
 ### Changed
 - Comment out misleading fail coverage
