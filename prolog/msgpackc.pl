@@ -3,7 +3,7 @@
     Created: Jan 19 2022
     Purpose: C-Based MessagePack for SWI-Prolog
 
-Copyright (c) 2022, Roy Ratcliffe, Northumberland, United Kingdom
+Copyright (c) 2022, 2025, Roy Ratcliffe, Northumberland, United Kingdom
 
 Permission is hereby granted, free of charge,  to any person obtaining a
 copy  of  this  software  and    associated   documentation  files  (the
@@ -30,6 +30,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           [ msgpack//1,                         % ?Term
 
             msgpack_object//1,                  % ?Object
+            msgpack_key//1,                     % ?Key
             msgpack_objects//1,                 % ?Objects
 
             msgpack_nil//0,
@@ -60,12 +61,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
             % map format family
             msgpack_map//2,                     % :OnPair,?Map
+            msgpack_map//1,                     % ?Map
+            msgpack_pair//3,                    % :OnKey,:OnValue,KeyValuePair
 
             % ext format family
             msgpack_ext//1,                     % ?Term
             msgpack_ext//2                      % ?Type,?Ext
           ]).
-:- autoload(library(dcg/high_order), [sequence//2, sequence/4]).
+:- autoload(library(dcg/high_order), [sequence//2]).
 :- autoload(library(utf8), [utf8_codes/3]).
 
 :- use_foreign_library(foreign(msgpackc)).
@@ -120,7 +123,7 @@ msgpack(float(Float)) --> msgpack_float(Float), !.
 msgpack(str(Str)) --> msgpack_str(Str), !.
 msgpack(bin(Bin)) --> msgpack_bin(Bin), !.
 msgpack(array(Array)) --> msgpack_array(msgpack, Array), !.
-msgpack(map(Map)) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map), !.
+msgpack(map(Map)) --> msgpack_map(Map), !.
 msgpack(Term) --> msgpack_ext(Term).
 
 %!  msgpack_object(?Object)// is semidet.
@@ -256,12 +259,13 @@ msgpack_true --> [0xc3].
 %   alternative representation for many integers.
 
 msgpack_float(Float) -->
-  { float64(Float, Bytes, []),
-    Bytes \= [_, _, _, _, 0, 0, 0, 0]
-  },
-  !,
-  [0xcb|Bytes].
-msgpack_float(Float) --> msgpack_float(_, Float), !.
+    { float64(Float, Bytes, []),
+      Bytes \= [_, _, _, _, 0, 0, 0, 0]
+    },
+    !,
+    [0xcb],
+    Bytes.
+msgpack_float(Float) --> msgpack_float(_, Float).
 
 msgpack_float(32, Float) --> [0xca], float32(Float).
 msgpack_float(64, Float) --> [0xcb], float64(Float).
@@ -391,7 +395,7 @@ msgpack_int(64, Int) --> [0xd3], int64(Int).
 %   Unifies Str with the shortest packed UTF-8 string message.
 
 msgpack_str(Str) --> msgpack_fixstr(Str), !.
-msgpack_str(Str) --> msgpack_str(_, Str), !.
+msgpack_str(Str) --> msgpack_str(_, Str).
 
 %!  msgpack_fixstr(?Str)// is semidet.
 %
@@ -493,7 +497,7 @@ str_width_format(32, 0xdb).
 %   if 32 bits is not enough to unify the number of bytes because the
 %   byte-list has more than four thousand megabytes.
 
-msgpack_bin(Bytes) --> msgpack_bin(_, Bytes), !.
+msgpack_bin(Bytes) --> msgpack_bin(_, Bytes).
 
 %!  msgpack_bin(?Width, ?Bytes:list)// is nondet.
 %
@@ -547,7 +551,7 @@ bin_width_format(32, 0xc6).
 %   predicate.
 
 msgpack_array(OnElement, Array) --> msgpack_fixarray(OnElement, Array), !.
-msgpack_array(OnElement, Array) --> msgpack_array(OnElement, _, Array), !.
+msgpack_array(OnElement, Array) --> msgpack_array(OnElement, _, Array).
 
 %!  msgpack_fixarray(:OnElement, Array)// is semidet.
 %!  msgpack_array(:OnElement, ?Width, ?Array)// is nondet.
@@ -619,11 +623,14 @@ array_width_format(32, 0xdd).
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
 %!  msgpack_map(:OnPair, ?Map:list)// is semidet.
+%!  msgpack_map(?Map:list)// is semidet.
 %
 %   Unify with Map using OnPair as the pair-wise grammar.
 
 msgpack_map(OnPair, Map) --> msgpack_fixmap(OnPair, Map), !.
-msgpack_map(OnPair, Map) --> msgpack_map(OnPair, _, Map), !.
+msgpack_map(OnPair, Map) --> msgpack_map(OnPair, _, Map).
+
+msgpack_map(Map) --> msgpack_map(msgpack_pair(msgpack, msgpack), Map).
 
 msgpack_fixmap(OnPair, Map) -->
     { var(Map),
@@ -667,6 +674,8 @@ msgpack_map(OnPair, Width, Map) -->
 map_width_format(16, 0xde).
 map_width_format(32, 0xdf).
 
+%!  msgpack_pair(:OnKey, :OnValue, KeyValuePair)// is semidet.
+
 msgpack_pair(OnKey, OnValue, Key-Value) -->
     call(OnKey, Key),
     call(OnValue, Value).
@@ -679,7 +688,8 @@ msgpack_dict(OnPair, Dict) -->
     { dict_create(Dict, _, Pairs)
     }.
 msgpack_dict(OnPair, Dict) -->
-    { dict_pairs(Dict, _, Pairs)
+    { is_dict(Dict),
+      dict_pairs(Dict, _, Pairs)
     },
     msgpack_map(OnPair, Pairs).
 
@@ -712,7 +722,7 @@ msgpack_ext(Term) -->
 %   Type is a signed integer. Ext is a list of byte codes.
 
 msgpack_ext(Type, Ext) --> msgpack_fixext(Type, Ext), !.
-msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext), !.
+msgpack_ext(Type, Ext) --> msgpack_ext(_, Type, Ext).
 
 msgpack_fixext(Type, Ext) -->
     { var(Type),
