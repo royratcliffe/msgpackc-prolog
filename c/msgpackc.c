@@ -265,7 +265,7 @@ int16_3(term_t Number, term_t Bytes0, term_t Bytes)
 { union xx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
-    return PL_unify_int64(Number, be16(raw.value));
+    return PL_unify_int64(Number, (int16_t)be16(raw.value));
   } else
   { int64_t value;
     if (!PL_get_int64(Number, &value) || value < INT16_MIN || value > INT16_MAX) PL_fail;
@@ -279,7 +279,7 @@ int32_3(term_t Number, term_t Bytes0, term_t Bytes)
 { union xxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
-    return PL_unify_int64(Number, be32(raw.value));
+    return PL_unify_int64(Number, (int32_t)be32(raw.value));
   } else
   { int64_t value;
     if (!PL_get_int64(Number, &value) || value < INT32_MIN || value > INT32_MAX) PL_fail;
@@ -293,7 +293,7 @@ int64_3(term_t Number, term_t Bytes0, term_t Bytes)
 { union xxxxxxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
-    return PL_unify_int64(Number, be64(raw.value));
+    return PL_unify_int64(Number, (int64_t)be64(raw.value));
   } else
   { int64_t value;
     if (!PL_get_int64(Number, &value)) PL_fail;
