@@ -265,6 +265,17 @@ int16_3(term_t Number, term_t Bytes0, term_t Bytes)
 { union xx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
+    /*
+     * Cast to int16_t to apply sign extension when unifying with an
+     * int64_t. This is important because the C compiler will not
+     * sign-extend a 16-bit integer to a 64-bit integer when converting
+     * from uint16_t to int64_t. The cast ensures that the value is
+     * correctly interpreted as a signed 16-bit integer before being
+     * unified with the Prolog term. Without this cast, the unification
+     * could result in an incorrect value if the original 16-bit integer
+     * was negative, as it would be treated as a large positive number
+     * due to the lack of sign extension.
+     */
     return PL_unify_int64(Number, (int16_t)be16(raw.value));
   } else
   { int64_t value;
