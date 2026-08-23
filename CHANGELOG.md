@@ -3,6 +3,10 @@
 Uses [Semantic Versioning](https://semver.org/). Always [keep a change
 log](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.0] - 2026-08-23
+### Fixed
+- Integer type casting in unification helper functions.
+
 ## [0.2.2] - 2025-04-21
 ### Fixed
 - The predicate `msgpack_dict` will fail if the argument provided is not a
