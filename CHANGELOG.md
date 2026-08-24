@@ -6,6 +6,7 @@ log](https://keepachangelog.com/en/1.0.0/).
 ## [0.3.0] - 2026-08-23
 ### Fixed
 - Integer type casting in unification helper functions.
+- Windows Makefile path handling for the shared library directory.
 
 ## [0.2.2] - 2025-04-21
 ### Fixed
