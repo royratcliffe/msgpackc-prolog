@@ -30,15 +30,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Important to realise that unsigned long is not always 32-bits wide. On
-some machines and operating systems, any `long` is 64-bits wide. Same
+Important to realise that unsigned long is not always 32 bits wide. On
+some machines and operating systems, any `long` is 64 bits wide. Same
 goes for float; some platforms make them identical to doubles.
-Fundamentally it all depends on the compiler itself.
+Fundamentally, it all depends on the compiler itself.
 
-Explicitly include header `stdint.h` although strictly-speaking
-unnecessary because SWI-Prolog import and uses `int64_t` and `uint64_t`
-types from the same header and therefore includes it. It stands here as
-a note for the direct dependency.
+Explicitly include the header `stdint.h`, although strictly speaking
+unnecessary because SWI-Prolog imports and uses `int64_t` and `uint64_t`
+types from the same header, and therefore includes the standard integer
+header. The inclusion stands here as a note for the direct dependency.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
