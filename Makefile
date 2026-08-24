@@ -5,7 +5,7 @@ CFLAGS += -O2 -fomit-frame-pointer
 
 all: $(SOBJ)
 
-# Add some special treatment for Windows, since it doesn't have a mkdir -p command.
+# Add some special treatment for Windows, since it does not have a mkdir "-p" option.
 # It will create the parent directories automatically if they do not already exist.
 # However, it requires the use of backslashes instead of forward slashes in the path.
 $(SOBJ): $(OBJ)
