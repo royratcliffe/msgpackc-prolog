@@ -30,15 +30,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-Important to realise that unsigned long is not always 32-bits wide. On
-some machines and operating systems, any `long` is 64-bits wide. Same
+Important to realise that unsigned long is not always 32 bits wide. On
+some machines and operating systems, any `long` is 64 bits wide. Same
 goes for float; some platforms make them identical to doubles.
-Fundamentally it all depends on the compiler itself.
+Fundamentally, it all depends on the compiler itself.
 
-Explicitly include header `stdint.h` although strictly-speaking
-unnecessary because SWI-Prolog import and uses `int64_t` and `uint64_t`
-types from the same header and therefore includes it. It stands here as
-a note for the direct dependency.
+Explicitly include the header `stdint.h`, although strictly speaking
+unnecessary because SWI-Prolog imports and uses `int64_t` and `uint64_t`
+types from the same header, and therefore includes the standard integer
+header. The inclusion stands here as a note for the direct dependency.
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
@@ -265,7 +265,18 @@ int16_3(term_t Number, term_t Bytes0, term_t Bytes)
 { union xx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
-    return PL_unify_int64(Number, be16(raw.value));
+    /*
+     * Cast to int16_t to apply sign extension when unifying with an
+     * int64_t. This is important because the C compiler will not
+     * sign-extend a 16-bit integer to a 64-bit integer when converting
+     * from uint16_t to int64_t. The cast ensures that the value is
+     * correctly interpreted as a signed 16-bit integer before being
+     * unified with the Prolog term. Without this cast, the unification
+     * could result in an incorrect value if the original 16-bit integer
+     * was negative, as it would be treated as a large positive number
+     * due to the lack of sign extension.
+     */
+    return PL_unify_int64(Number, (int16_t)be16(raw.value));
   } else
   { int64_t value;
     if (!PL_get_int64(Number, &value) || value < INT16_MIN || value > INT16_MAX) PL_fail;
@@ -279,7 +290,7 @@ int32_3(term_t Number, term_t Bytes0, term_t Bytes)
 { union xxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
-    return PL_unify_int64(Number, be32(raw.value));
+    return PL_unify_int64(Number, (int32_t)be32(raw.value));
   } else
   { int64_t value;
     if (!PL_get_int64(Number, &value) || value < INT32_MIN || value > INT32_MAX) PL_fail;
@@ -293,7 +304,7 @@ int64_3(term_t Number, term_t Bytes0, term_t Bytes)
 { union xxxxxxxx raw;
   if (PL_is_variable(Number))
   { if (!get_list_bytes(Bytes0, Bytes, sizeof(raw.bytes), raw.bytes)) PL_fail;
-    return PL_unify_int64(Number, be64(raw.value));
+    return PL_unify_int64(Number, (int64_t)be64(raw.value));
   } else
   { int64_t value;
     if (!PL_get_int64(Number, &value)) PL_fail;
