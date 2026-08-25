@@ -6,3 +6,4 @@ packager('Roy Ratcliffe', 'roy@ratcliffe.me').
 maintainer('Roy Ratcliffe', 'roy@ratcliffe.me').
 home('https://github.com/swipl/msgpackc').
 download('https://github.com/swipl/msgpackc/releases/*.zip').
+pack_version(2).
